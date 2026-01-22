@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { Menu, X, ShoppingBag } from "lucide-react";
+import { ShoppingBag, Menu, X, Heart, HelpCircle, Grid } from "lucide-react";
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Efek Kaca saat di-scroll
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -14,22 +13,27 @@ export const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: "Koleksi", href: "#products" },
-    { name: "Tentang", href: "#about" },
-    { name: "Testimoni", href: "#reviews" },
-  ];
+  // Fungsi Scroll Halus
+  const scrollToSection = (id) => {
+    setIsMobileMenuOpen(false);
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        isScrolled ? "bg-[#F0F7F4]/80 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
+        isScrolled ? "bg-[#F0F7F4]/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-6"
       }`}>
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2 cursor-pointer">
-          <div className="bg-emerald-600 text-white p-2 rounded-xl rotate-3 hover:rotate-6 transition duration-300">
-            <ShoppingBag size={20} />
+        <div
+          className="flex items-center gap-2 cursor-pointer group"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          <div className="bg-emerald-600 text-white p-2.5 rounded-xl group-hover:rotate-12 transition-transform duration-300 shadow-lg shadow-emerald-200">
+            <ShoppingBag size={22} />
           </div>
           <span className="font-extrabold text-2xl text-teal-900 tracking-tight">
             Luma<span className="text-emerald-600">Store</span>.
@@ -38,17 +42,26 @@ export const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              className="text-teal-800 font-bold hover:text-emerald-600 transition relative group">
-              {link.name}
-              <span className="absolute -bottom-1 left-0 w-0 h-1 bg-emerald-400 rounded-full transition-all group-hover:w-full"></span>
-            </a>
-          ))}
-          <button className="bg-teal-800 text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-teal-900/20 hover:bg-teal-900 hover:-translate-y-0.5 transition-all">
-            Masuk
+          <button
+            onClick={() => scrollToSection("benefits")}
+            className="text-teal-800 font-bold hover:text-emerald-600 transition flex items-center gap-1">
+            Keunggulan
+          </button>
+          <button
+            onClick={() => scrollToSection("products")}
+            className="text-teal-800 font-bold hover:text-emerald-600 transition flex items-center gap-1">
+            Koleksi
+          </button>
+          <button
+            onClick={() => scrollToSection("faq")}
+            className="text-teal-800 font-bold hover:text-emerald-600 transition flex items-center gap-1">
+            Bantuan
+          </button>
+
+          <button
+            onClick={() => scrollToSection("products")}
+            className="bg-teal-800 text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-teal-900/20 hover:bg-teal-900 hover:-translate-y-0.5 transition-all">
+            Mulai Belanja
           </button>
         </div>
 
@@ -58,18 +71,24 @@ export const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-100 p-4 flex flex-col gap-4 shadow-xl">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              className="text-teal-800 font-bold py-2 px-4 hover:bg-emerald-50 rounded-lg"
-              onClick={() => setIsMobileMenuOpen(false)}>
-              {link.name}
-            </a>
-          ))}
+        <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-lg border-b border-gray-100 p-6 flex flex-col gap-4 shadow-xl animate-fade-in-down">
+          <button
+            onClick={() => scrollToSection("benefits")}
+            className="text-left text-teal-800 font-bold py-3 border-b border-gray-100">
+            Keunggulan
+          </button>
+          <button
+            onClick={() => scrollToSection("products")}
+            className="text-left text-teal-800 font-bold py-3 border-b border-gray-100">
+            Koleksi Aset
+          </button>
+          <button
+            onClick={() => scrollToSection("faq")}
+            className="text-left text-teal-800 font-bold py-3 border-b border-gray-100">
+            Pusat Bantuan
+          </button>
         </div>
       )}
     </nav>
