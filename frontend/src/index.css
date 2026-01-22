@@ -48,3 +48,38 @@ body {
 .animate-slide-up {
   animation: slideUp 0.4s ease-out forwards;
 }
+
+/* ANIMASI BARU: Floating Elements ala Goodnotes */
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes float-reverse {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(15px) rotate(-2deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.animate-float-slow {
+  animation: float 6s ease-in-out infinite;
+}
+.animate-float-medium {
+  animation: float-reverse 5s ease-in-out infinite;
+}
+.animate-float-fast {
+  animation: float 4s ease-in-out infinite;
+}

@@ -11,6 +11,10 @@ export const FAQ = () => {
       a: "Gampang! 1. Checkout & Bayar. 2. Cek Email & Download. 3. Print filenya di kertas stiker (HVS Sticker/Vinyl). 4. Gunting sesuai pola.",
     },
     {
+      q: "Rekomendasi Kertas & Printer?",
+      a: "Agar hasil maksimal, gunakan kertas 'Vinyl Sticker Paper' (A4 Glossy). Pastikan settingan printer di mode 'High Quality' atau 'Photo Paper' supaya warnanya tajam dan tidak pudar.",
+    },
+    {
       q: "Boleh untuk dijual lagi (Komersial)?",
       a: "Maaf, HANYA UNTUK PEMAKAIAN PRIBADI (Personal Use) ya. Boleh buat jurnal sendiri atau kado teman, tapi tidak boleh jual file atau hasil cetaknya.",
     },
