@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-
-// Import API
 import { getProducts } from "../../lib/api/ProductApi";
 import { purchaseProduct } from "../../lib/api/PaymentApi";
 
-// Import Components (Clean Architecture)
-import { Navbar } from "./Section/Navbar"; // Pastikan export default di Navbar
+// Import Components (Named Exports)
+import { Navbar } from "./Section/Navbar";
 import { Hero } from "./Section/Hero";
 import { Benefits } from "./Section/Benefits";
 import { ProductShowcase } from "./Section/ProductShowcase";
@@ -13,24 +11,22 @@ import { FAQ } from "./Section/FAQ";
 import { Footer } from "./Section/Footer";
 import { CheckoutModal } from "../CheckoutModal";
 
-export function HomePage() {
-  // --- STATE MANAGEMENT ---
+export const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // --- 1. INITIAL LOAD (Data & Snap) ---
   useEffect(() => {
-    // Setup Midtrans Snap
-    const clientKey = "SB-Mid-client-XXXXXXXXXXXXXXXX"; // GANTI CLIENT KEY MU
+    // 1. Setup Snap Midtrans
+    const clientKey = "SB-Mid-client-XXXXXXXXXXXXXXXX"; // GANTI KEY KAMU
     const script = document.createElement("script");
     script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
     script.setAttribute("data-client-key", clientKey);
     script.async = true;
     document.body.appendChild(script);
 
-    // Fetch Produk
+    // 2. Fetch Data
     getProducts()
       .then((res) => res.json())
       .then((json) => setProducts(json.data || []))
@@ -38,73 +34,51 @@ export function HomePage() {
       .finally(() => setLoading(false));
 
     return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
+      if (document.body.contains(script)) document.body.removeChild(script);
     };
   }, []);
 
-  // --- 2. EVENT HANDLERS ---
   const handleOpenModal = (product) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
   };
 
   const handleProcessPayment = async (product, customerName, customerEmail) => {
-    setIsModalOpen(false); // Tutup modal biar UX halus
-
+    setIsModalOpen(false);
     try {
       const res = await purchaseProduct({
         product_id: product.id,
         customer_name: customerName,
         customer_email: customerEmail,
       });
-
       const data = await res.json();
-
       if (data.token && window.snap) {
         window.snap.pay(data.token, {
-          onSuccess: (result) => {
-            console.log(result);
-            alert("✅ Pembayaran Berhasil! Cek emailmu untuk link download.");
-          },
-          onPending: (result) => {
-            console.log(result);
-            alert("⏳ Menunggu pembayaran...");
-          },
-          onError: (result) => {
-            console.error(result);
-            alert("❌ Pembayaran gagal.");
-          },
-          onClose: () => {
-            alert("Kamu menutup popup pembayaran.");
-          },
+          onSuccess: () => alert("✅ Makasih ya udah beli! Cek email kamu."),
+          onPending: () => alert("⏳ Menunggu pembayaran..."),
+          onError: () => alert("❌ Pembayaran gagal."),
         });
-      } else {
-        alert("Gagal mendapatkan token: " + (data.message || "Unknown Error"));
       }
     } catch (error) {
-      console.error(error);
-      alert("Error Sistem: " + error.message);
+      alert("Error: " + error.message);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F7F4] font-sans text-teal-900 pb-20 selection:bg-emerald-200 selection:text-teal-900">
-      {/* Navigation */}
+    // FIX FOOTER: min-h-screen + flex-col
+    <div className="min-h-screen flex flex-col font-sans text-[#3E362E]">
       <Navbar />
 
-      {/* Content Sections */}
-      <Hero />
-      <Benefits />
+      {/* Konten Utama (flex-grow mendorong footer ke bawah) */}
+      <div className="flex-grow">
+        <Hero />
+        <Benefits />
+        <ProductShowcase products={products} loading={loading} onBuy={handleOpenModal} />
+        <FAQ />
+      </div>
 
-      {/* Kirim data products & loading ke component showcase */}
-      <ProductShowcase products={products} loading={loading} onBuy={handleOpenModal} />
-
-      <FAQ />
       <Footer />
 
-      {/* Global Modal */}
       <CheckoutModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -113,6 +87,4 @@ export function HomePage() {
       />
     </div>
   );
-}
-
-export default HomePage;
+};

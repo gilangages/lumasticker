@@ -1,25 +1,13 @@
 export const Footer = () => {
   return (
-    <footer className="bg-teal-900 text-teal-100 py-12 mt-20">
-      <div className="max-w-6xl mx-auto px-6 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-8">
+    <footer className="bg-[#EAE7DF] border-t-2 border-[#E5E0D8] py-8 mt-12">
+      <div className="max-w-6xl mx-auto px-6 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
-          <h3 className="text-2xl font-bold text-white mb-2">LumaStore.</h3>
-          <p className="text-teal-300/80 text-sm">Platform aset digital untuk kreator masa depan.</p>
+          <h3 className="font-black text-xl text-[#3E362E]">LumaStore.</h3>
+          <p className="text-[#6B5E51] text-sm mt-1">Stiker lucu-lucuan buat jurnal kamu.</p>
         </div>
-        <div className="flex gap-6 text-sm font-bold">
-          <a href="#" className="hover:text-white transition">
-            Instagram
-          </a>
-          <a href="#" className="hover:text-white transition">
-            Twitter
-          </a>
-          <a href="#" className="hover:text-white transition">
-            Support
-          </a>
-        </div>
-      </div>
-      <div className="text-center text-xs text-teal-500 mt-10 border-t border-teal-800 pt-8">
-        &copy; {new Date().getFullYear()} Luma Store. All rights reserved.
+
+        <div className="text-[#6B5E51] text-xs">&copy; {new Date().getFullYear()} Dibuat dengan ☕ & 🎨</div>
       </div>
     </footer>
   );
