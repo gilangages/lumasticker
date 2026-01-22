@@ -67,22 +67,24 @@ export const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
+      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-[#FDFCF8] border-b border-[#E5E0D8] p-6 flex flex-col gap-4 shadow-xl">
+          {/* SAMAKAN DENGAN DESKTOP */}
           <button
             onClick={() => scrollToSection("products")}
             className="text-left text-[#3E362E] font-bold py-2 border-b border-dashed border-[#E5E0D8]">
-            Lihat Koleksi
+            Koleksi
           </button>
           <button
             onClick={() => scrollToSection("benefits")}
             className="text-left text-[#3E362E] font-bold py-2 border-b border-dashed border-[#E5E0D8]">
-            Keunggulan
+            Kenapa Beli?
           </button>
           <button
             onClick={() => scrollToSection("faq")}
             className="text-left text-[#3E362E] font-bold py-2 border-b border-dashed border-[#E5E0D8]">
-            Tanya Jawab
+            Tanya Dulu
           </button>
         </div>
       )}

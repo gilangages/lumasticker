@@ -1,7 +1,7 @@
 export const WhatsAppSection = () => {
   return (
     // Jarak dikurangi dari py-20 jadi py-12
-    <section className="py-12 px-6 max-w-4xl mx-auto text-center mb-10">
+    <section className="py-4 px-6 max-w-4xl mx-auto text-center mb-10">
       <div className="bg-[#F3F0E9] rounded-3xl p-8 md:p-12 border-2 border-[#E5E0D8] relative overflow-hidden group hover:border-[#8DA399] transition-colors">
         {/* Dekorasi Background */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#8DA399]/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
