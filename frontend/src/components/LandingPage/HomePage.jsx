@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getProducts } from "../../lib/api/ProductApi";
 import { purchaseProduct } from "../../lib/api/PaymentApi";
 
-// Import Components (Named Exports)
+// Import Components
 import { Navbar } from "./Section/Navbar";
 import { Hero } from "./Section/Hero";
 import { Benefits } from "./Section/Benefits";
@@ -11,12 +11,21 @@ import { FAQ } from "./Section/FAQ";
 import { Footer } from "./Section/Footer";
 import { CheckoutModal } from "../CheckoutModal";
 import { WhatsAppSection } from "./Section/WhatsAppSection";
+import { SuccessModal } from "../SuccessModal";
+import { ErrorModal } from "../ErrorModal"; // Komponen ErrorModal
 
 export const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Checkout Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Success & Error Modal State
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [isErrorOpen, setIsErrorOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     // 1. Setup Snap Midtrans
@@ -31,7 +40,11 @@ export const HomePage = () => {
     getProducts()
       .then((res) => res.json())
       .then((json) => setProducts(json.data || []))
-      .catch((err) => console.error("Gagal load produk:", err))
+      .catch((err) => {
+        console.error("Gagal load produk:", err);
+        // Bisa ganti alert ini dengan showError juga kalau mau
+        alert("Gagal memuat produk. Cek koneksi internetmu.");
+      })
       .finally(() => setLoading(false));
 
     return () => {
@@ -44,8 +57,16 @@ export const HomePage = () => {
     setIsModalOpen(true);
   };
 
+  // --- PERBAIKAN DI SINI ---
+  // Ganti nama dari ErrorModal menjadi showError
+  const showError = (msg) => {
+    setErrorMessage(msg);
+    setIsErrorOpen(true);
+  };
+
   const handleProcessPayment = async (product, customerName, customerEmail) => {
-    setIsModalOpen(false);
+    setIsModalOpen(false); // Tutup checkout modal dulu
+
     try {
       const res = await purchaseProduct({
         product_id: product.id,
@@ -53,24 +74,44 @@ export const HomePage = () => {
         customer_email: customerEmail,
       });
       const data = await res.json();
+
       if (data.token && window.snap) {
         window.snap.pay(data.token, {
-          onSuccess: () => alert("✅ Makasih ya udah beli! Cek email kamu."),
-          onPending: () => alert("⏳ Menunggu pembayaran..."),
-          onError: () => alert("❌ Pembayaran gagal."),
+          onSuccess: (result) => {
+            console.log("Success Result:", result);
+            // Paksa modal sukses muncul
+            setTimeout(() => {
+              setIsSuccessOpen(true);
+            }, 500);
+          },
+          onPending: (result) => {
+            console.log("Pending Result:", result);
+            // Panggil showError (bukan ErrorModal)
+            showError("Pembayaran sedang diproses. Cek aplikasi pembayaranmu.");
+          },
+          onError: (result) => {
+            console.error("Error Result:", result);
+            // Panggil showError
+            showError("Pembayaran gagal. Silakan coba lagi.");
+          },
+          onClose: () => {
+            console.log("Popup closed");
+          },
         });
+      } else {
+        // Panggil showError
+        showError("Gagal mendapatkan token: " + (data.message || "Unknown Error"));
       }
     } catch (error) {
-      alert("Error: " + error.message);
+      // Panggil showError
+      showError("Error Sistem: " + error.message);
     }
   };
 
   return (
-    // FIX FOOTER: min-h-screen + flex-col
     <div className="min-h-screen flex flex-col font-sans text-[#3E362E]">
       <Navbar />
 
-      {/* Konten Utama (flex-grow mendorong footer ke bawah) */}
       <div className="flex-grow">
         <Hero />
         <Benefits />
@@ -87,7 +128,15 @@ export const HomePage = () => {
         product={selectedProduct}
         onSubmit={handleProcessPayment}
       />
-      {/* Floating WA Button (Logo Asli) */}
+
+      {/* Success Modal */}
+      <SuccessModal isOpen={isSuccessOpen} onClose={() => setIsSuccessOpen(false)} />
+
+      {/* Error Modal */}
+      {/* Sekarang aman, ErrorModal di sini merujuk ke Komponen Import */}
+      <ErrorModal isOpen={isErrorOpen} onClose={() => setIsErrorOpen(false)} message={errorMessage} />
+
+      {/* Floating WA Button */}
       <a
         href="https://wa.me/6281234567890?text=Halo%20kak,%20mau%20tanya..."
         target="_blank"
