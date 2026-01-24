@@ -9,8 +9,8 @@ export const Benefits = () => {
     },
     {
       icon: <Printer size={32} />,
-      title: "Siap Cetak (A4)",
-      desc: "Dapet file format A4 yang sudah ditata rapi. Tinggal klik print di kertas stiker, gunting, tempel!",
+      title: "Format Hemat Kertas (A4)",
+      desc: "Dapet layout A4 yang efisien. Print satu lembar langsung dapet banyak stiker. Gunting manual atau pakai mesin cutting? Dua-duanya oke!",
     },
     {
       icon: <PenTool size={32} />,
