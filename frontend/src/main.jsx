@@ -9,25 +9,30 @@ import AdminLogout from "./components/Admin/AdminLogout.jsx";
 import ProductList from "./components/Admin/Pages/ProductList.jsx";
 import ProductForm from "./components/Admin/Pages/ProductForm.jsx";
 import DashboardOverview from "./components/Admin/Pages/DashboardOverview.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import NotFound from "./components/NotFound.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        {/* public route */}
         <Route path="/" element={<HomePage />} />
-
         <Route path="admin/login" element={<AdminLogin />} />
 
-        <Route path="/admin" element={<LayoutAdmin />}>
-          {/* Index route otomatis ke dashboard */}
-          <Route index element={<DashboardOverview />} />
+        {/* Rute Admin yang Diproteksi */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<LayoutAdmin />}>
+            {/* Index route otomatis ke dashboard */}
+            <Route index element={<DashboardOverview />} />
 
-          <Route path="dashboard" element={<DashboardOverview />} />
-          <Route path="products" element={<ProductList />} />
-          <Route path="upload" element={<ProductForm />} />
-
-          <Route path="logout" element={<AdminLogout />} />
+            <Route path="dashboard" element={<DashboardOverview />} />
+            <Route path="products" element={<ProductList />} />
+            <Route path="upload" element={<ProductForm />} />
+            <Route path="logout" element={<AdminLogout />} />
+          </Route>
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
