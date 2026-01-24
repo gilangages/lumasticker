@@ -9,10 +9,10 @@ import { Benefits } from "./Section/Benefits";
 import { ProductShowcase } from "./Section/ProductShowcase";
 import { FAQ } from "./Section/FAQ";
 import { Footer } from "./Section/Footer";
-import { CheckoutModal } from "../CheckoutModal";
+import { CheckoutModal } from "./CheckoutModal";
 import { WhatsAppSection } from "./Section/WhatsAppSection";
-import { SuccessModal } from "../SuccessModal";
-import { ErrorModal } from "../ErrorModal";
+import { SuccessModal } from "./SuccessModal";
+import { ErrorModal } from "./ErrorModal";
 
 export const HomePage = () => {
   const [products, setProducts] = useState([]);
