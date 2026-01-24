@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import AdminDashboard from "./components/Admin/AdminDashboard.jsx";
 import AdminLogin from "./components/Admin/AdminLogin.jsx";
 import LayoutAdmin from "./components/Admin/LayoutAdmin/LayoutAdmin.jsx";
+import AdminLogout from "./components/Admin/AdminLogout.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -19,6 +20,7 @@ createRoot(document.getElementById("root")).render(
           {/* Index route otomatis ke dashboard */}
           <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="logout" element={<AdminLogout />} />
         </Route>
       </Routes>
     </BrowserRouter>

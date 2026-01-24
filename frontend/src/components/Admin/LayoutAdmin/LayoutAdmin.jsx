@@ -1,21 +1,6 @@
-import { Outlet, Link, useNavigate } from "react-router";
-import { useLocalStorage } from "react-use";
+import { Outlet, Link } from "react-router";
 
 export default function LayoutAdmin() {
-  const navigate = useNavigate();
-  const [token, __setToken, removeToken] = useLocalStorage("admin_token");
-
-  const handleLogout = () => {
-    removeToken();
-    navigate("/admin/login");
-  };
-
-  // Proteksi sederhana: Jika tidak ada token, redirect ke login
-  // (Sebaiknya gunakan useEffect, tapi ini inline check cepat)
-  if (!token && typeof window !== "undefined") {
-    // navigate("/admin/login"); // Uncomment jika ingin proteksi ketat
-  }
-
   return (
     <div className="flex min-h-screen bg-[#fdfcf8]">
       {/* Sidebar Sederhana */}
@@ -26,11 +11,11 @@ export default function LayoutAdmin() {
             Dashboard
           </Link>
           <div className="block py-2 px-4 hover:bg-[#50463b] rounded cursor-not-allowed opacity-50">Pesanan (Soon)</div>
-          <button
-            onClick={handleLogout}
+          <Link
+            to="/admin/logout"
             className="w-full text-left py-2 px-4 text-[#d68c76] hover:bg-[#50463b] rounded mt-8">
             Logout
-          </button>
+          </Link>
         </nav>
       </aside>
 

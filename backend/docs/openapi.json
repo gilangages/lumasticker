@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Luma Store API",
-    "description": "Dokumentasi API untuk Luma Digital Asset Store. Fokus pada penjualan aset digital direct-buy.",
+    "description": "Dokumentasi API Luma Digital Asset Store. Mencakup Public API dan Admin Management.",
     "version": "1.0.0",
     "contact": {
       "name": "Abdian Developer",
@@ -15,186 +15,14 @@
       "description": "Local Development Server"
     }
   ],
-  "tags": [
-    {
-      "name": "Products",
-      "description": "Operasi terkait data produk digital"
-    },
-    {
-      "name": "Payment",
-      "description": "Operasi transaksi dan integrasi Midtrans"
-    }
-  ],
-  "paths": {
-    "/products": {
-      "get": {
-        "tags": [
-          "Products"
-        ],
-        "summary": "Ambil Semua Produk",
-        "description": "Mengambil daftar semua produk digital yang tersedia di database untuk ditampilkan di gallery frontend.",
-        "responses": {
-          "200": {
-            "description": "Berhasil mengambil data produk",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "List Data Produk"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Product"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server Error"
-          }
-        }
-      }
-    },
-    "/payment/purchase": {
-      "post": {
-        "tags": [
-          "Payment"
-        ],
-        "summary": "Buat Transaksi Baru (Snap Token)",
-        "description": "Membuat order ID unik dan meminta Token Snap dari Midtrans berdasarkan produk yang dipilih.",
-        "requestBody": {
-          "description": "Data pelanggan dan produk yang akan dibeli",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "product_id",
-                  "customer_name",
-                  "customer_email"
-                ],
-                "properties": {
-                  "product_id": {
-                    "type": "integer",
-                    "description": "ID Produk yang ada di database",
-                    "example": 1
-                  },
-                  "customer_name": {
-                    "type": "string",
-                    "description": "Nama lengkap pembeli",
-                    "example": "Abdian Ganteng"
-                  },
-                  "customer_email": {
-                    "type": "string",
-                    "format": "email",
-                    "description": "Email valid untuk pengiriman link download",
-                    "example": "abdian@example.com"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Token berhasil dibuat",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Token Pembayaran Berhasil Dibuat"
-                    },
-                    "token": {
-                      "type": "string",
-                      "description": "Token Snap Midtrans (kunci popup)",
-                      "example": "c720-3810-jkd9-2910"
-                    },
-                    "order_id": {
-                      "type": "string",
-                      "description": "Order ID unik format LUMA-TIMESTAMP-ID",
-                      "example": "LUMA-1769079329333-1"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Produk tidak ditemukan di database"
-          },
-          "500": {
-            "description": "Gagal koneksi ke Midtrans"
-          }
-        }
-      }
-    },
-    "/payment/notification": {
-      "post": {
-        "tags": [
-          "Payment"
-        ],
-        "summary": "Midtrans Webhook (Jangan dipanggil Frontend)",
-        "description": "Endpoint khusus untuk menerima notifikasi status pembayaran dari server Midtrans secara otomatis.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "order_id": {
-                    "type": "string",
-                    "example": "LUMA-1769079329333-1"
-                  },
-                  "transaction_status": {
-                    "type": "string",
-                    "enum": [
-                      "capture",
-                      "settlement",
-                      "pending",
-                      "deny",
-                      "expire",
-                      "cancel"
-                    ],
-                    "example": "settlement"
-                  },
-                  "fraud_status": {
-                    "type": "string",
-                    "example": "accept"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK (Sinyal diterima)"
-          }
-        }
-      }
-    }
-  },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "schemas": {
       "Product": {
         "type": "object",
@@ -222,6 +50,259 @@
           "file_url": {
             "type": "string",
             "example": "https://drive.google.com/..."
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "abdian@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "rahasia123"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Autentikasi Admin"
+    },
+    {
+      "name": "Products",
+      "description": "Manajemen Produk (Public & Admin)"
+    },
+    {
+      "name": "Payment",
+      "description": "Transaksi Midtrans"
+    }
+  ],
+  "paths": {
+    "/admin/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login Admin",
+        "description": "Mendapatkan JWT Token untuk akses fitur Admin.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login Berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhGciOiJIUzI1Ni..."
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Login berhasil"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Email atau Password Salah"
+          }
+        }
+      }
+    },
+    "/admin/logout": {
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout Admin",
+        "description": "Menghapus sesi admin (Client harus menghapus token).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logout Berhasil"
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Ambil Semua Produk (Public)",
+        "responses": {
+          "200": {
+            "description": "List Produk",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Tambah Produk Baru (Admin Only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "price",
+                  "file_url"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "number"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "image_url": {
+                    "type": "string"
+                  },
+                  "file_url": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Produk Dibuat"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/products/{id}": {
+      "delete": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Hapus Produk (Admin Only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Produk Dihapus"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/payment/purchase": {
+      "post": {
+        "tags": [
+          "Payment"
+        ],
+        "summary": "Buat Transaksi Snap",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "product_id": {
+                    "type": "integer"
+                  },
+                  "customer_name": {
+                    "type": "string"
+                  },
+                  "customer_email": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/payment/notification": {
+      "post": {
+        "tags": [
+          "Payment"
+        ],
+        "summary": "Webhook Midtrans",
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

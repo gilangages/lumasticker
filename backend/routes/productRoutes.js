@@ -1,9 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { getProducts, createProduct } = require("../controllers/productController");
+const productController = require("../controllers/productController");
+const verifyToken = require("../middleware/authMiddleware");
 
-// Jalur GET /api/products
-router.get("/", getProducts);
-router.post("/", createProduct);
+/// Public Route
+router.get("/", productController.getAllProducts);
+
+// Protected Routes (Hanya Admin yang punya Token yang bisa akses)
+// Catatan: Pastikan kamu sudah buat fungsi createProduct & deleteProduct di controller
+router.post("/", verifyToken, productController.createProduct);
+router.delete("/:id", verifyToken, productController.deleteProduct);
 
 module.exports = router;

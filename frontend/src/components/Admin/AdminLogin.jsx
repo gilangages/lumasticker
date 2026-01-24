@@ -1,25 +1,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useLocalStorage } from "react-use";
-import { alertError } from "../../lib/api/alert";
+import { alertError } from "../../lib/alert";
+import { adminLogin } from "../../lib/api/AdminApi";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   // Simpan token (mock token)
-  const [__token, setToken] = useLocalStorage("admin_token", "");
+  const [_, setToken] = useLocalStorage("token", "");
 
-  const handleLogin = (e) => {
+  async function handleLogin(e) {
     e.preventDefault();
     // LOGIKA LOGIN SEMENTARA (Hardcode) - Ganti dengan API call nanti
-    if (email === "admin@luma.com" && password === "admin123") {
-      setToken("mock-token-rahasia");
-      navigate("/admin/dashboard");
+    const response = await adminLogin({ email, password });
+    const responseBody = await response.json();
+    console.log(responseBody);
+
+    if (response.status === 200) {
+      const token = responseBody.token;
+      setToken(token);
+      await navigate({
+        pathname: "/admin/dashboard",
+      });
     } else {
-      alertError("Email atau password salah!");
+      await alertError(responseBody.message);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#fdfcf8] bg-[radial-gradient(#e5e0d8_1px,transparent_1px)] [background-size:20px_20px]">
@@ -34,7 +42,7 @@ export default function AdminLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-[#fdfcf8] border-2 border-[#e5e0d8] rounded-lg p-3 focus:border-[#8da399] focus:outline-none transition-colors"
-              placeholder="admin@luma.com"
+              placeholder="budi@gmail.com"
             />
           </div>
           <div>

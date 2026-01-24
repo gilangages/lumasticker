@@ -9,7 +9,8 @@ const swaggerDocument = require("./docs/openapi.json");
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
+const authRoutes = require("./routes/authRoutes");
 
 // Middleware
 app.use(cors());
@@ -18,6 +19,7 @@ app.use(express.json()); // Supaya bisa baca JSON dari Frontend
 app.use("/api/products", productRoutes); // <--- Pasang Jalurnya di sini
 app.use("/api/payment", paymentRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/api/admin", authRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
