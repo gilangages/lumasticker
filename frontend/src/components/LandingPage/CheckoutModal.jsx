@@ -1,11 +1,15 @@
-import { X, Lock, ChevronLeft, ChevronRight, Image as ImageIcon, ZoomIn, Info, Mail } from "lucide-react";
+import { X, Lock, ChevronLeft, ChevronRight, Image as ImageIcon, ZoomIn, Info, Mail, Check } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router";
 
 export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [currentImgIdx, setCurrentImgIdx] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
+
+  // STATE BARU: Default false (belum setuju)
+  const [isAgreed, setIsAgreed] = useState(false);
 
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
@@ -59,6 +63,7 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!isAgreed) return; // Mencegah submit jika belum setuju
     onSubmit(product, name, email);
   };
 
@@ -187,9 +192,40 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
                     </p>
                   </div>
                 </div>
+
+                {/* --- BAGIAN BARU: SYARAT & KETENTUAN (Style menyesuaikan tema) --- */}
+                <div className="pt-2">
+                  <div
+                    className="flex items-start gap-3 group cursor-pointer select-none"
+                    onClick={() => setIsAgreed(!isAgreed)}>
+                    {/* Custom Checkbox agar sesuai tema (bukan checkbox browser default) */}
+                    <div
+                      className={`w-5 h-5 mt-0.5 shrink-0 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                        isAgreed
+                          ? "bg-[#3E362E] border-[#3E362E]"
+                          : "bg-white border-[#E5E0D8] group-hover:border-[#8DA399]"
+                      }`}>
+                      {isAgreed && <Check size={14} className="text-[#FDFCF8]" strokeWidth={4} />}
+                    </div>
+
+                    <p className="text-xs text-[#6B5E51] font-medium leading-snug">
+                      Saya menyetujui{" "}
+                      <Link to="/terms" className="underline decoration-dotted hover:text-[#3E362E] transition-colors">
+                        Syarat & Ketentuan
+                      </Link>{" "}
+                      serta{" "}
+                      <Link
+                        to="/privacy"
+                        className="underline decoration-dotted hover:text-[#3E362E] transition-colors">
+                        Kebijakan Privasi
+                      </Link>
+                      .
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* Section Harga & Tombol - Lebih Impactful */}
+              {/* Section Harga & Tombol */}
               <div className="pt-6 mt-4 border-t-2 border-dashed border-[#E5E0D8]">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between px-1">
@@ -203,8 +239,16 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
 
                   <button
                     type="submit"
-                    className="w-full bg-[#3E362E] hover:bg-[#8DA399] text-[#FDFCF8] font-black py-4 rounded-xl shadow-[4px_4px_0px_0px_rgba(141,163,153,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all flex justify-center items-center gap-3 uppercase tracking-widest text-sm group border-2 border-[#3E362E]">
-                    <Lock size={18} className="group-hover:rotate-12 transition-transform" />
+                    disabled={!isAgreed}
+                    // LOGIKA STYLE:
+                    // Jika setuju (isAgreed = true) -> Pakai class ASLI 100%
+                    // Jika belum (isAgreed = false) -> Pakai style disabled (abu-abu)
+                    className={
+                      isAgreed
+                        ? "w-full bg-[#3E362E] hover:bg-[#8DA399] text-[#FDFCF8] font-black py-4 rounded-xl shadow-[4px_4px_0px_0px_rgba(141,163,153,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all flex justify-center items-center gap-3 uppercase tracking-widest text-sm group border-2 border-[#3E362E]"
+                        : "w-full bg-[#E5E0D8] text-[#3E362E]/40 font-black py-4 rounded-xl flex justify-center items-center gap-3 uppercase tracking-widest text-sm border-2 border-[#E5E0D8] cursor-not-allowed"
+                    }>
+                    <Lock size={18} className={isAgreed ? "group-hover:rotate-12 transition-transform" : ""} />
                     Bungkus Sekarang
                   </button>
                 </div>

@@ -12,6 +12,8 @@ import DashboardOverview from "./components/Admin/Pages/DashboardOverview.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import NotFound from "./components/NotFound.jsx";
 import OrderHistory from "./components/Admin/Pages/OrderHistory.jsx";
+import TermsAndConditions from "./components/LandingPage/TermsAndConditions.jsx";
+import PrivacyPolicy from "./components/LandingPage/PrivacyPolicy.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -20,6 +22,8 @@ createRoot(document.getElementById("root")).render(
         {/* public route */}
         <Route path="/" element={<HomePage />} />
         <Route path="admin/login" element={<AdminLogin />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
 
         {/* Rute Admin yang Diproteksi */}
         <Route element={<ProtectedRoute />}>
