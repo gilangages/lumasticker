@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllProducts } from "../../lib/api/ProductApi";
 import { purchaseProduct } from "../../lib/api/PaymentApi";
+import lumaLogo from "../../assets/luma-sticker.png";
 
 // Import Components
 import { Navbar } from "./Section/Navbar";
@@ -14,9 +15,33 @@ import { WhatsAppSection } from "./Section/WhatsAppSection";
 import { SuccessModal } from "./SuccessModal";
 import { ErrorModal } from "./ErrorModal";
 
+const DUMMY_PRODUCTS = [
+  {
+    id: 1,
+    name: "Paket Stiker Luma Basic",
+    price: 15000,
+    description: "Koleksi stiker vinyl tahan air dengan karakter Luma yang lucu. Cocok untuk laptop dan helm.",
+    image_url: lumaLogo, // Bisa ganti link gambar asli jika ada
+  },
+  {
+    id: 2,
+    name: "Stiker Edisi Developer",
+    price: 10000,
+    description: "Stiker khusus programmer: React, Node.js, dan kopi. Bahan high quality matte.",
+    image_url: lumaLogo,
+  },
+  {
+    id: 3,
+    name: "Bundle Hemat 3 Pack",
+    price: 10000,
+    description: "Dapatkan 3 varian sekaligus dengan harga lebih murah. Stok terbatas!",
+    image_url: lumaLogo,
+  },
+];
+
 export const HomePage = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(DUMMY_PRODUCTS);
+  const [_, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -119,7 +144,7 @@ export const HomePage = () => {
       <div className="flex-grow">
         <Hero />
         <Benefits />
-        <ProductShowcase products={products} loading={loading} onBuy={handleOpenModal} />
+        <ProductShowcase products={products} loading={false} onBuy={handleOpenModal} />
         <FAQ />
         <WhatsAppSection />
       </div>
