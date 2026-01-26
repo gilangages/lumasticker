@@ -83,11 +83,22 @@ export const HomePage = () => {
 
     // 4. Fetch Data
     getAllProducts()
-      .then((res) => res.json())
-      .then((json) => setProducts(json.data || []))
+      .then((res) => {
+        if (!res.ok) throw new Error("Gagal memuat data");
+        return res.json();
+      })
+      .then((json) => {
+        if (json.data && json.data.length > 0) {
+          setProducts(json.data);
+        } else {
+          console.log("Database kosong, menggunakan Dummy Data untuk tampilan.");
+          setProducts(DUMMY_PRODUCTS);
+        }
+      })
       .catch((err) => {
         console.error(err);
-        showError("Gagal memuat produk."); // Sekarang aman dipanggil
+        setProducts(DUMMY_PRODUCTS);
+        showError("Gagal memuat produk asli, menampilkan contoh."); // Sekarang aman dipanggil
       })
       .finally(() => setLoading(false));
 
