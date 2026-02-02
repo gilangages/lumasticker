@@ -55,9 +55,37 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
       if (e.key === "ArrowLeft") prevImage();
       if (e.key === "Escape") setIsZoomOpen(false);
     };
+    if (isOpen) {
+      // Trik: Tambahkan state palsu ke history browser saat modal terbuka
+      // Ini membuat tombol back di HP "memakan" state ini dulu sebelum menutup tab
+      window.history.pushState({ modalOpen: true }, "", window.location.href);
+
+      const handlePopState = (event) => {
+        console.info(event);
+        // Fungsi ini jalan saat tombol Back ditekan
+        // Kita panggil onClose() untuk menutup modal secara visual
+        onClose();
+      };
+
+      // Pasang event listener
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        // Bersihkan listener saat modal ditutup
+        window.removeEventListener("popstate", handlePopState);
+
+        // Opsional: Jika modal ditutup lewat tombol "X" (bukan back button),
+        // history browser mungkin masih nyangkut.
+        // Cek apakah kita masih dalam state modalOpen, jika ya, mundur sekali.
+        // (Sederhananya: ini mencegah user harus tekan back 2x di masa depan)
+        if (window.history.state?.modalOpen) {
+          window.history.back();
+        }
+      };
+    }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isZoomOpen, currentImgIdx, images.length]);
+  }, [isOpen, isZoomOpen, currentImgIdx, images.length]);
 
   if (!isOpen || !product) return null;
 

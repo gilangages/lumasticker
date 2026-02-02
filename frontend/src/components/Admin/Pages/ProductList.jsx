@@ -146,14 +146,22 @@ export default function ProductList() {
 
   async function handleDelete(id) {
     if (!(await alertConfirm("Apakah kamu yakin mau menghapus produk ini?"))) return;
-    const response = await productDelete(token, id);
-    const responseBody = await response.json();
-    if (response.status === 200) {
-      await alertSuccess(responseBody.message);
-      setReload(!reload);
-    } else {
+    try {
+      const response = await productDelete(token, id);
       const responseBody = await response.json();
-      alertError(responseBody.message);
+
+      if (response.ok) {
+        // Logic pesan sekarang dinamis sesuai respon cerdas dari backend tadi
+        // Kalo bersih: "Produk berhasil dihapus!"
+        // Kalo soft delete: "Produk diarsipkan..."
+        await alertSuccess(responseBody.message);
+        setReload(!reload);
+      } else {
+        alertError(responseBody.message || "Terjadi kesalahan saat menghapus.");
+      }
+    } catch (error) {
+      console.error(error);
+      alertError("Gagal menghubungi server.");
     }
   }
 

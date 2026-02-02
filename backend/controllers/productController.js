@@ -112,24 +112,35 @@ const deleteProduct = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [check] = await db.query("SELECT * FROM products WHERE id = ?", [id]);
-    if (check.length === 0) return res.status(404).json({ message: "Produk tidak ditemukan" });
+    // 1. Coba Hard Delete (Hapus permanen jika belum ada transaksi)
+    // Jika produk ini sudah ada di tabel orders/transaksi, database akan menolak (Error Constraint)
+    await db.query("DELETE FROM products WHERE id = ?", [id]);
 
-    // [FIX] Lakukan Soft Delete
-    await db.query("UPDATE products SET is_deleted = 1 WHERE id = ?", [id]);
-
-    res.status(200).json({ success: true, message: "Produk berhasil dihapus (soft delete)" });
+    // Jika berhasil sampai sini, berarti produk benar-benar terhapus (bersih)
+    res.status(200).json({
+      success: true,
+      message: "Produk berhasil dihapus!",
+    });
   } catch (error) {
-    console.error("Error delete product:", error);
-
-    // [FIX] Tangani error Foreign Key Constraint (Produk sudah pernah dibeli)
+    // 2. Tangani jika gagal karena sudah pernah dibeli (Foreign Key Constraint)
     if (error.code === "ER_ROW_IS_REFERENCED_2") {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Produk tidak dapat dihapus karena sudah memiliki riwayat transaksi. Sebaiknya nonaktifkan produk saja.",
-      });
+      try {
+        // Lakukan Soft Delete (Arsip)
+        await db.query("UPDATE products SET is_deleted = 1 WHERE id = ?", [id]);
+
+        return res.status(200).json({
+          success: true,
+          // Ini pesan spesifik dari backend jika produk sudah pernah dibeli
+          message: "Produk diarsipkan (Soft Delete) karena memiliki riwayat transaksi.",
+        });
+      } catch (updateError) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Gagal mengarsipkan produk", error: updateError.message });
+      }
     }
+
+    console.error("Error delete product:", error);
     res.status(500).json({ success: false, message: "Gagal menghapus produk", error: error.message });
   }
 };
@@ -237,17 +248,50 @@ const updateProduct = async (req, res) => {
 const bulkDeleteProducts = async (req, res) => {
   const { ids } = req.body;
 
+  if (!ids || ids.length === 0) {
+    return res.status(400).json({ success: false, message: "Tidak ada ID yang dipilih" });
+  }
+
+  let deletedCount = 0; // Hitungan dihapus permanen
+  let archivedCount = 0; // Hitungan soft delete
+  let errorCount = 0; // Hitungan error lain
+
   try {
-    if (!ids || ids.length === 0) {
-      return res.status(400).json({ success: false, message: "Tidak ada ID yang dipilih" });
+    // Loop setiap ID agar jika satu gagal, yang lain tetap terproses
+    for (const id of ids) {
+      try {
+        // 1. Coba Hard Delete
+        await db.query("DELETE FROM products WHERE id = ?", [id]);
+        deletedCount++;
+      } catch (error) {
+        // 2. Jika gagal karena constraint (sudah pernah dibeli), lakukan Soft Delete
+        if (error.code === "ER_ROW_IS_REFERENCED_2") {
+          await db.query("UPDATE products SET is_deleted = 1 WHERE id = ?", [id]);
+          archivedCount++;
+        } else {
+          console.error(`Gagal delete product ${id}:`, error);
+          errorCount++;
+        }
+      }
     }
 
-    const query = "DELETE FROM products WHERE id IN (?)";
-    await db.query(query, [ids]);
+    // 3. Susun Pesan Rekapitulasi yang Cerdas
+    let messageParts = [];
+    if (deletedCount > 0) messageParts.push(`${deletedCount} dihapus permanen`);
+    if (archivedCount > 0) messageParts.push(`${archivedCount} diarsipkan`);
+    if (errorCount > 0) messageParts.push(`${errorCount} gagal`);
 
-    res.status(200).json({ success: true, message: `${ids.length} produk berhasil dihapus` });
+    const finalMessage =
+      messageParts.length > 0 ? `Sukses: ${messageParts.join(", ")}.` : "Tidak ada produk yang diproses.";
+
+    res.status(200).json({
+      success: true,
+      message: finalMessage,
+      data: { deletedCount, archivedCount, errorCount },
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Bulk delete error:", error);
+    res.status(500).json({ success: false, message: "Terjadi kesalahan server saat bulk delete" });
   }
 };
 
