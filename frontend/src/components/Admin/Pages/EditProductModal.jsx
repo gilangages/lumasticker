@@ -101,7 +101,7 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
       setPrice(product.price || "");
       setDescription(product.description || "");
 
-      // A. Ambil Label (Parse jika JSON string, atau pakai langsung jika Array)
+      // A. Ambil Label (Parse jika JSON string untuk fallback)
       let loadedLabels = [];
       if (product.image_labels) {
         if (Array.isArray(product.image_labels)) {
@@ -121,16 +121,28 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
 
       // Cek apakah images array valid
       if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-        initialItems = product.images.map((imgUrl, idx) => ({
-          id: `existing-${idx}-${Date.now()}`,
-          preview: imgUrl, // Ini yang dipakai <img src={item.preview}>
-          originalUrl: imgUrl, // URL asli untuk referensi hapus
-          file: null, // File null karena ini gambar lama
-          isExisting: true,
-          label: loadedLabels[idx] || "", // Ambil label sesuai urutan index
-        }));
+        initialItems = product.images.map((item, idx) => {
+          // [FIX LOGIC] Cek apakah item adalah Object (Format Baru) atau String (Format Lama)
+          const isObject = typeof item === "object" && item !== null;
+
+          // Ambil URL dan Label sesuai formatnya
+          const url = isObject ? item.url : item;
+          const labelFromImg = isObject ? item.label || "" : "";
+
+          // Prioritaskan label dari object gambar, jika kosong baru ambil dari array labels terpisah
+          const finalLabel = labelFromImg || loadedLabels[idx] || "";
+
+          return {
+            id: `existing-${idx}-${Date.now()}`,
+            preview: url, // Gunakan URL yang sudah diextract (String)
+            originalUrl: url, // Gunakan URL yang sudah diextract (String)
+            file: null,
+            isExisting: true,
+            label: finalLabel, // Gunakan Label yang sudah diextract
+          };
+        });
       }
-      // Fallback untuk struktur data lama (single image_url)
+      // Fallback untuk struktur data legacy (single image_url)
       else if (product.image_url) {
         initialItems = [
           {
@@ -201,26 +213,38 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
       formData.append("price", price);
       formData.append("description", description);
 
-      // 1. Gambar Baru
+      // [FIX] Susun Metadata untuk Backend
+      const metadata = items.map((item, index) => {
+        if (item.isExisting) {
+          // Jika gambar lama
+          return {
+            type: "existing",
+            url: item.originalUrl, // URL asli dari DB
+            label: item.label,
+            order: index,
+          };
+        } else {
+          // Jika gambar baru
+          return {
+            type: "new",
+            label: item.label,
+            order: index,
+          };
+        }
+      });
+
+      // Kirim metadata sebagai JSON string
+      formData.append("images_metadata", JSON.stringify(metadata));
+
+      // [FIX] Kirim File Gambar Baru
+      // PENTING: Urutan append file harus sama dengan urutan item "new" di metadata
       items.forEach((item) => {
         if (!item.isExisting && item.file) {
           formData.append("images", item.file);
         }
       });
 
-      // 2. Gambar Lama yang Dihapus
-      const originalImages = product.images || (product.image_url ? [product.image_url] : []);
-      const currentExistingUrls = items.filter((i) => i.isExisting).map((i) => i.originalUrl);
-      const deletedImages = originalImages.filter((url) => !currentExistingUrls.includes(url));
-
-      if (deletedImages.length > 0) {
-        formData.append("deleted_images", JSON.stringify(deletedImages));
-      }
-
-      // 3. Labels (Dikirim berurutan sesuai tampilan akhir)
-      const finalLabels = items.map((item) => item.label || "");
-      formData.append("image_labels", JSON.stringify(finalLabels));
-
+      // Panggil API
       const response = await productUpdate(token, product.id, formData);
       const responseBody = await response.json();
 
@@ -339,7 +363,7 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
                           <span className="font-bold text-[#3e362e] text-sm group-hover:text-[#2e7d32] transition-colors">
                             Tambah Foto Lain
                           </span>
-                          <p className="text-[10px] text-gray-400">Format: JPG, PNG (Max 2MB)</p>
+                          <p className="text-[10px] text-gray-400">Format: JPG, PNG (Max 10MB)</p>
                         </div>
                       </div>
                     </div>

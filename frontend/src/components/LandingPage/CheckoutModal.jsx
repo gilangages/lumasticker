@@ -165,9 +165,7 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
             <div className="mb-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#3E362E]/5 rounded-lg mb-4 border border-[#3E362E]/10">
                 <ImageIcon size={12} className="text-[#3E362E]" />
-                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#3E362E]">
-                  Digital Artwork
-                </span>
+                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#3E362E]">Karya Digital</span>
               </div>
 
               <h2 className="text-3xl font-black text-[#3E362E] mb-4 leading-[1.1] uppercase italic tracking-tight">

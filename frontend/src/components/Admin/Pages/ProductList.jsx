@@ -108,10 +108,22 @@ export default function ProductList() {
   };
 
   const handleViewImage = (product) => {
-    const images =
-      product.images && Array.isArray(product.images) && product.images.length > 0
-        ? product.images
-        : [product.image_url];
+    let images = [];
+
+    // Cek apakah product.images ada dan valid
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      images = product.images.map((img) => {
+        // [FIX] Jika img adalah object (format baru), ambil property .url
+        if (typeof img === "object" && img !== null) {
+          return img.url;
+        }
+        // Jika string (format lama), kembalikan langsung
+        return img;
+      });
+    } else if (product.image_url) {
+      images = [product.image_url];
+    }
+
     setCurrentImages(images);
     setCurrentIndex(0);
     setIsModalOpen(true);
