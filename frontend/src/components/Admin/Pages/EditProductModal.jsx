@@ -363,7 +363,7 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
                           <span className="font-bold text-[#3e362e] text-sm group-hover:text-[#2e7d32] transition-colors">
                             Tambah Foto Lain
                           </span>
-                          <p className="text-[10px] text-gray-400">Format: JPG, PNG (Max 10MB)</p>
+                          <p className="text-[10px] text-gray-400">Format: JPG, PNG (Max 5MB)</p>
                         </div>
                       </div>
                     </div>
