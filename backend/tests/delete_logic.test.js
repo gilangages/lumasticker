@@ -1,17 +1,11 @@
 // backend/tests/delete_logic.test.js
 
-// 1. MOCK DATABASE (Paling Atas)
-// Gunakan factory function () => ({...}) agar file asli 'config/database.js' TIDAK PERNAH dieksekusi.
-// Ini akan mencegah error "Menggunakan koneksi Cloud (TiDB)" dan error "cesu8".
-jest.mock("../config/database", () => {
-  return {
-    query: jest.fn(),
-    end: jest.fn(), // Mock fungsi end() jaga-jaga
-    // Tambahkan method lain jika controller memakainya
-  };
-});
+// 1. MOCK DATABASE & CLOUDINARY
+jest.mock("../config/database", () => ({
+  query: jest.fn(),
+  end: jest.fn(),
+}));
 
-// 2. MOCK CLOUDINARY & MIDDLEWARE
 jest.mock("../middleware/uploadMiddleware", () => ({
   cloudinary: {
     uploader: {
@@ -21,12 +15,11 @@ jest.mock("../middleware/uploadMiddleware", () => ({
   upload: {},
 }));
 
-// 3. Baru import file yang mau dites
 const { deleteProduct } = require("../controllers/productController");
-const db = require("../config/database"); // Ini sekarang akan memanggil mock di atas
+const db = require("../config/database");
 const { cloudinary } = require("../middleware/uploadMiddleware");
 
-// Mock Response Express
+// Mock Response
 const mockRes = () => {
   const res = {};
   res.status = jest.fn().mockReturnValue(res);
@@ -39,40 +32,47 @@ describe("Product Deletion Logic", () => {
     jest.clearAllMocks();
   });
 
-  it("Harus menghapus SEMUA gambar (cloudinary) yang ada di produk", async () => {
-    // 1. Setup Mock Data
-    const mockImages = JSON.stringify([
-      { url: "https://res.cloudinary.com/demo/image/upload/v1/folder/img2.jpg" },
-      { url: "https://res.cloudinary.com/demo/image/upload/v1/folder/img3.jpg" },
+  it("Harus sukses menghapus berbagai format URL (Normal, Folder, & Transformasi)", async () => {
+    // KASUS PENTING: Simulasi URL Cloudinary dengan Transformasi (w_1000)
+    // Inilah penyebab bug "sisa 2" foto kamu sebelumnya.
+    const complexImages = JSON.stringify([
+      { url: "https://res.cloudinary.com/demo/image/upload/v12345/lumastore/sepatu-keren.jpg" }, // Normal
+      { url: "https://res.cloudinary.com/demo/image/upload/w_1000,c_fill/v98765/lumastore/baju-baru.png" }, // Punya Transformasi
     ]);
+
     const mockProduct = {
-      id: 1,
-      image_url: "https://res.cloudinary.com/demo/image/upload/v1/folder/img1.jpg",
-      images: mockImages,
+      id: 99,
+      // Main image juga punya folder
+      image_url: "https://res.cloudinary.com/demo/image/upload/v11111/folder/subfolder/topi.jpg",
+      images: complexImages,
     };
 
-    // Mock return values untuk query database
-    // Query ke-1: SELECT -> return array produk
-    db.query.mockResolvedValueOnce([[mockProduct]]);
-    // Query ke-2: DELETE -> return sukses
-    db.query.mockResolvedValueOnce([{ affectedRows: 1 }]);
+    // Setup DB Mock
+    db.query.mockResolvedValueOnce([[mockProduct]]); // Select
+    db.query.mockResolvedValueOnce([{ affectedRows: 1 }]); // Delete
 
-    const req = { params: { id: 1 } };
+    const req = { params: { id: 99 } };
     const res = mockRes();
 
-    // 2. Jalankan Fungsi
+    // Execute
     await deleteProduct(req, res);
 
-    // 3. Assertions (Pembuktian)
-    // Pastikan destroy dipanggil 3 kali (sesuai jumlah gambar)
+    // ASSERTIONS
+    expect(res.status).toHaveBeenCalledWith(200);
+
+    // Cek Cloudinary Destroy dipanggil 3 kali
     expect(cloudinary.uploader.destroy).toHaveBeenCalledTimes(3);
 
-    // Cek detail pemanggilan
-    expect(cloudinary.uploader.destroy).toHaveBeenCalledWith("folder/img1");
-    expect(cloudinary.uploader.destroy).toHaveBeenCalledWith("folder/img2");
-    expect(cloudinary.uploader.destroy).toHaveBeenCalledWith("folder/img3");
+    // Cek apakah Public ID yang diekstrak BENAR (tanpa ekstensi, tanpa v123, tanpa w_1000)
 
-    // Pastikan response sukses
-    expect(res.status).toHaveBeenCalledWith(200);
+    // 1. Cek Image Normal
+    expect(cloudinary.uploader.destroy).toHaveBeenCalledWith("lumastore/sepatu-keren");
+
+    // 2. Cek Image dengan Transformasi (Ini tes paling penting!)
+    // Parser harus pintar membuang 'w_1000,c_fill/v98765/' dan hanya ambil ID
+    expect(cloudinary.uploader.destroy).toHaveBeenCalledWith("lumastore/baju-baru");
+
+    // 3. Cek Image dengan Folder Bertingkat
+    expect(cloudinary.uploader.destroy).toHaveBeenCalledWith("folder/subfolder/topi");
   });
 });

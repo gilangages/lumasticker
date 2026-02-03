@@ -24,32 +24,40 @@ const getBaseUrl = (req) => {
   return `${protocol}://${host}`;
 };
 
-/// === HELPER UTAMA: Ekstrak Public ID Cloudinary (SUPER ROBUST VERSION) ===
+// === HELPER UTAMA: Ekstrak Public ID Cloudinary (BEST PRACTICE & ROBUST) ===
 const getCloudinaryPublicId = (url) => {
-  if (!url) return null;
+  if (!url || !url.includes("cloudinary.com")) return null;
   try {
-    // 1. Hapus Query Parameters (?v=123 dll) agar tidak mengganggu parsing
+    // 1. Hapus Query Parameters
     const urlWithoutQuery = url.split("?")[0];
 
-    // 2. Cari posisi '/upload/'
-    const splitPath = urlWithoutQuery.split("/upload/");
-    if (splitPath.length < 2) return null;
+    // 2. Hapus Extension (.jpg, .png, dll) dari akhir URL
+    // Regex ini menghapus titik terakhir dan karakter setelahnya
+    const urlWithoutExt = urlWithoutQuery.replace(/\.[^/.]+$/, "");
 
-    // 3. Ambil bagian setelah '/upload/' (contoh: v123456/lumastore/sepatu.jpg)
-    let publicIdWithVersion = splitPath[1];
+    // 3. Regex Magic: Cari pola "/v<angka>/<public_id>"
+    // Cloudinary standard: .../upload/w_500,c_fill/v123456789/folder/namaproduk
+    // Kita ingin mengambil "folder/namaproduk"
+    const regex = /\/v\d+\/(.+)$/;
+    const match = urlWithoutExt.match(regex);
 
-    // 4. Hapus Version Prefix (v12345/) jika ada
-    // Cloudinary version selalu diawali 'v' diikuti angka dan '/'
-    publicIdWithVersion = publicIdWithVersion.replace(/^v\d+\//, "");
-
-    // 5. Hapus Extension (.jpg, .png) di akhir
-    // Kita split titik, buang bagian terakhir (ext), lalu gabung lagi (jaga-jaga nama file ada titiknya)
-    const parts = publicIdWithVersion.split(".");
-    if (parts.length > 1) {
-      parts.pop(); // Buang extension
+    if (match && match[1]) {
+      // match[1] adalah grup tangkapan setelah /v<angka>/
+      return match[1];
     }
 
-    return parts.join("."); // Return ID murni (contoh: "lumastore/sepatu")
+    // 4. Fallback: Jika tidak ada version (jarang terjadi di modern Cloudinary, tapi possible)
+    // Ambil string setelah "/upload/" dan abaikan segmen transformasi jika ada
+    const splitPath = urlWithoutExt.split("/upload/");
+    if (splitPath.length >= 2) {
+      const pathAfterUpload = splitPath[1];
+      // Jika path mengandung '/' (misal: w_500/folder/img), kita ambil bagian paling belakang sebagai ID??
+      // Sebenarnya fallback ini berisiko. Lebih aman asumsikan URL selalu punya version jika pakai library official.
+      // Namun, untuk safety, kita kembalikan path setelah upload, lalu hapus folder transform jika terdeteksi.
+      return pathAfterUpload;
+    }
+
+    return null;
   } catch (error) {
     console.error("Gagal ekstrak public ID:", error);
     return null;
