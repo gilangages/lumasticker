@@ -2,111 +2,125 @@
 const request = require("supertest");
 const express = require("express");
 const path = require("path");
-const dotenv = require("dotenv");
-
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
-
-// === 1. MOCK MYSQL2 ===
-jest.mock("mysql2", () => ({
-  createPool: jest.fn(() => ({
-    promise: jest.fn(() => ({
-      query: jest.fn().mockResolvedValue([{ insertId: 100, affectedRows: 1 }]),
-      end: jest.fn().mockResolvedValue(),
-    })),
-    getConnection: jest.fn((cb) => cb(null, { release: jest.fn() })),
-  })),
-}));
-
-// === 2. MOCK CLOUDINARY & MULTER ===
-// Kita mock 'multer' agar tidak perlu menulis file fisik saat test
-// Kita simulasikan perilaku mode PRODUCTION (Cloudinary) untuk test ini
-jest.mock("../middleware/uploadMiddleware", () => {
-  const multer = require("multer");
-  // Mock Storage Engine
-  const storage = multer.memoryStorage();
-
-  return {
-    upload: multer({ storage }), // Pakai memory storage biar gak nyampah file
-    cloudinary: {
-      uploader: { destroy: jest.fn() }, // Mock fungsi destroy
-    },
-  };
-});
-
-// Karena kita mock middleware, kita harus manual inject file.path
-// agar Controller bisa membacanya seperti behaviour aslinya
 const productController = require("../controllers/productController");
 
-// Setup App
+// === 1. MOCK DATABASE ===
+// Kita mock db.query agar tidak perlu koneksi MySQL asli
+jest.mock("../config/database", () => ({
+  query: jest.fn(),
+}));
+const db = require("../config/database");
+
+// === 2. MOCK CLOUDINARY ===
+jest.mock("../middleware/uploadMiddleware", () => ({
+  cloudinary: {
+    uploader: { destroy: jest.fn() },
+  },
+}));
+
+// === 3. SETUP EXPRESS APP UNTUK TEST ===
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Mock Auth
-app.use((req, res, next) => {
-  req.user = { id: 1, role: "admin" };
-  next();
-});
-
-// === MIDDLEWARE INTERCEPTOR KHUSUS TEST ===
-// Ini meniru apa yang dilakukan multer-storage-cloudinary / diskStorage
-// yaitu mengisi req.files[i].path
-const mockFileProcessor = (req, res, next) => {
-  if (req.files) {
-    req.files = req.files.map((f) => ({
-      ...f,
-      // Pura-pura ini URL dari Cloudinary atau Local path
-      path: "https://fake-cloudinary.com/lumastore_products/test-image.jpg",
-      filename: "test-image.jpg",
-      originalname: "test-image.jpg",
-    }));
-  }
+// Mock Middleware Multer (Simulasi req.files)
+// Kita buat middleware dinamis agar bisa test beda scenario (Local vs Prod)
+const mockUploadMiddleware = (req, res, next) => {
+  // Simulasi data file yang dihasilkan Multer
+  req.files = [
+    {
+      fieldname: "images",
+      originalname: "test-sticker.jpg",
+      encoding: "7bit",
+      mimetype: "image/jpeg",
+      destination: "public/uploads",
+      filename: "test-sticker-123.jpg",
+      path: req.isProductionMock
+        ? "https://res.cloudinary.com/demo/image/upload/sample.jpg" // Cloudinary Path
+        : "public/uploads/test-sticker-123.jpg", // Local Disk Path
+      size: 1024,
+    },
+  ];
   next();
 };
 
-const { upload } = require("../middleware/uploadMiddleware"); // Mocked version
+app.post("/api/products", mockUploadMiddleware, productController.createProduct);
 
-app.post(
-  "/api/products",
-  upload.array("images"),
-  mockFileProcessor, // Tambahkan interceptor ini
-  productController.createProduct,
-);
-
-describe("POST /api/products", () => {
-  // Set Environment ke Production untuk test path ini
+describe("POST /api/products - Upload Logic", () => {
   const OLD_ENV = process.env;
+
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.resetModules();
-    process.env = { ...OLD_ENV, NODE_ENV: "production" };
+    process.env = { ...OLD_ENV }; // Reset env
   });
+
   afterAll(() => {
     process.env = OLD_ENV;
   });
 
-  it("should upload successfully and return correct URL structure", async () => {
+  test("Should create product with CLOUDINARY URL in PRODUCTION", async () => {
+    // 1. Set ENV ke Production
+    process.env.NODE_ENV = "production";
+
+    // 2. Mock DB Success
+    db.query.mockResolvedValue([{ insertId: 100 }]);
+
+    // 3. Inject flag ke request agar mock middleware tau kita mau simulasi path Cloudinary
     const res = await request(app)
       .post("/api/products")
-      .field("name", "Produk Test")
-      .field("price", 150000)
-      .field("description", "Deskripsi")
-      // Kirim file dummy
-      .attach("images", Buffer.from("dummy"), "test.jpg");
+      .send({
+        name: "Stiker Production",
+        price: 50000,
+        description: "Deskripsi Pro",
+        image_labels: JSON.stringify(["Tampak Depan"]),
+      })
+      .set("Content-Type", "multipart/form-data") // Pura-pura upload
+      .use((req) => {
+        req.isProductionMock = true;
+      }); // Custom hook untuk mock middleware
 
-    expect(res.statusCode).toEqual(201);
+    expect(res.statusCode).toBe(201);
     expect(res.body.success).toBe(true);
 
-    // Pastikan URL yang disimpan adalah URL dari "Cloudinary" (mocked path)
-    const images = res.body.data.images;
-    expect(images[0]).toContain("fake-cloudinary.com");
+    const savedImage = res.body.data.images[0];
+    // Pastikan URL yang disimpan langsung dari Cloudinary
+    expect(savedImage.url).toContain("https://res.cloudinary.com");
+    expect(savedImage.label).toBe("Tampak Depan");
   });
 
-  it("should return 400 if validation fails", async () => {
+  test("Should create product with LOCALHOST URL in DEVELOPMENT", async () => {
+    // 1. Set ENV ke Development
+    process.env.NODE_ENV = "development";
+    process.env.PORT = "5000";
+
+    // 2. Mock DB Success
+    db.query.mockResolvedValue([{ insertId: 101 }]);
+
+    // 3. Request (Tanpa flag isProductionMock, jadi akan simulasi path local)
     const res = await request(app)
       .post("/api/products")
-      .field("price", 50000) // Name hilang
-      .attach("images", Buffer.from("dummy"), "test.jpg");
+      .field("name", "Stiker Local")
+      .field("price", 15000)
+      .field("description", "Deskripsi Loc")
+      .field("image_labels", JSON.stringify(["Label A"]));
 
-    expect(res.statusCode).toEqual(400);
+    expect(res.statusCode).toBe(201);
+
+    const savedImage = res.body.data.images[0];
+
+    // === POIN PENTING UNTUK LOCAL ===
+    // Controller harus mengubah 'public/uploads/file.jpg'
+    // menjadi 'http://127.0.0.1:xxxxx/uploads/file.jpg'
+    expect(savedImage.url).toMatch(/http:\/\/127\.0\.0\.1:\d+\/uploads\/test-sticker-123\.jpg/);
+    // ATAU jika pakai localhost
+    // expect(savedImage.url).toContain("/uploads/test-sticker-123.jpg");
+  });
+
+  test("Should fail if required fields are missing", async () => {
+    const res = await request(app).post("/api/products").field("price", 15000); // Nama hilang
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toContain("wajib diisi");
   });
 });

@@ -89,34 +89,48 @@ const createProduct = async (req, res) => {
   try {
     const { name, price, description, file_url, image_labels } = req.body;
 
+    // Validasi input
     if (!name || !price || !description) {
+      // Hapus file yang terlanjur terupload jika validasi gagal (Clean up)
+      if (req.files) {
+        req.files.forEach((file) => {
+          // Logic hapus file local temp ada disini jika mau sangat strict
+        });
+      }
       return res.status(400).json({ success: false, message: "Nama, harga, dan deskripsi wajib diisi!" });
     }
+
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ success: false, message: "Minimal upload 1 gambar produk!" });
     }
 
-    const labels = safeParseJSON(image_labels);
-    const protocol = req.protocol;
-    const host = req.get("host");
+    const labels = safeParseJSON(image_labels, []);
+
+    // === LOGIC URL BEST PRACTICE ===
+    // Menggunakan environment variable untuk BASE URL agar lebih konsisten
     const isProduction = process.env.NODE_ENV === "production";
 
-    // === LOGIC PENENTUAN URL ===
+    // Fallback jika API_BASE_URL tidak di-set di .env local
+    const protocol = req.protocol;
+    const host = req.get("host");
+    const baseUrl = process.env.API_BASE_URL || `${protocol}://${host}`;
+
     const imageObjects = req.files.map((file, index) => {
       let finalUrl;
 
       if (isProduction) {
-        // Cloudinary: URL sudah disediakan oleh library di file.path
+        // Cloudinary: file.path sudah berupa URL https://res.cloudinary.com/...
         finalUrl = file.path;
       } else {
-        // Local: file.path adalah path disk komputer, kita butuh URL Browser
-        // Pastikan di index.js sudah ada: app.use('/uploads', express.static('public/uploads'));
-        finalUrl = `${protocol}://${host}/uploads/${file.filename}`;
+        // Local: Gabungkan Base URL + path static
+        // File disimpan di: public/uploads/filename.jpg
+        // Diakses via: http://localhost:5000/uploads/filename.jpg
+        finalUrl = `${baseUrl}/uploads/${file.filename}`;
       }
 
       return {
         url: finalUrl,
-        label: labels[index] || file.originalname.split(".")[0],
+        label: labels[index] || file.originalname.replace(/\.[^/.]+$/, ""), // Remove extension
         order: index,
       };
     });
@@ -126,6 +140,7 @@ const createProduct = async (req, res) => {
 
     const query =
       "INSERT INTO products (name, price, description, image_url, images, file_url) VALUES (?, ?, ?, ?, ?, ?)";
+
     const [result] = await db.query(query, [name, price, description, mainImage, imagesJson, file_url || null]);
 
     res.status(201).json({
@@ -136,7 +151,7 @@ const createProduct = async (req, res) => {
         name,
         price,
         description,
-        images: imageObjects.map((img) => img.url),
+        images: imageObjects, // Return full object (url + label) agar frontend langsung update
       },
     });
   } catch (error) {

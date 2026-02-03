@@ -5,6 +5,7 @@ const productRoutes = require("./routes/productRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./docs/openapi.json");
+const path = require("path");
 
 dotenv.config();
 
@@ -33,6 +34,10 @@ app.use(
 );
 
 app.use(express.json()); // Supaya bisa baca JSON dari Frontend
+
+// === PERBAIKAN UTAMA DI SINI ===
+// Izinkan akses ke folder public/uploads secara statis
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 app.use("/api/products", productRoutes); // <--- Pasang Jalurnya di sini
 app.use("/api/payment", paymentRoutes);
