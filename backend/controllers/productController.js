@@ -68,6 +68,14 @@ const createProduct = async (req, res) => {
   try {
     const { name, price, description, file_url, image_labels } = req.body;
 
+    // [FIX 1] Tambahkan Validasi Input (Agar test case 400 passed)
+    if (!name || !price || !description) {
+      return res.status(400).json({
+        success: false,
+        message: "Nama, harga, dan deskripsi wajib diisi!",
+      });
+    }
+
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ success: false, message: "Minimal upload 1 gambar produk!" });
     }
@@ -81,25 +89,31 @@ const createProduct = async (req, res) => {
     // Map files ke struktur object baru
     const imageObjects = req.files.map((file, index) => ({
       url: `${protocol}://${host}/uploads/${file.filename}`,
-      // [LOGIC] Jika label dari frontend kosong, pakai nama file asli (tanpa ekstensi)
       label: labels[index] || file.originalname.split(".")[0],
       order: index,
     }));
 
-    // Gambar utama adalah index ke-0 (urutan pertama)
     const mainImage = imageObjects[0].url;
-
-    // Simpan sebagai JSON string
     const imagesJson = JSON.stringify(imageObjects);
 
     const query =
       "INSERT INTO products (name, price, description, image_url, images, file_url) VALUES (?, ?, ?, ?, ?, ?)";
     const [result] = await db.query(query, [name, price, description, mainImage, imagesJson, file_url || null]);
 
+    // [FIX 2] Kembalikan Data Lengkap (Agar test case 201 passed)
     res.status(201).json({
       success: true,
       message: "Produk berhasil ditambahkan",
-      data: { id: result.insertId },
+      data: {
+        id: result.insertId,
+        name: name,
+        price: price,
+        description: description,
+        // Kirim images agar bisa dicek di test
+        // Perhatikan: Test mungkin butuh penyesuaian sedikit jika dia expect string URL,
+        // tapi secara struktur ini sudah benar mengirim balik array.
+        images: imageObjects.map((img) => img.url),
+      },
     });
   } catch (error) {
     console.error("Error createProduct:", error);

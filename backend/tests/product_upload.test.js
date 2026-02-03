@@ -90,7 +90,11 @@ describe("POST /api/products (Upload Feature)", () => {
       .attach("images", Buffer.from("fake"), "foto.jpg");
 
     expect(res.statusCode).toEqual(400);
-    expect(res.body.message).toContain("Deskripsi wajib diisi");
+
+    // [FIX] Sesuaikan pesan dengan Controller (huruf kecil 'd' dan kalimat lengkap)
+    expect(res.body.message).toContain("deskripsi wajib diisi");
+    // ATAU bisa juga cek pesan lengkapnya:
+    // expect(res.body.message).toBe("Nama, harga, dan deskripsi wajib diisi!");
   });
 
   it("should fail if image is missing", async () => {
