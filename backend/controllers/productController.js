@@ -24,15 +24,32 @@ const getBaseUrl = (req) => {
   return `${protocol}://${host}`;
 };
 
-// === HELPER UTAMA: Ekstrak Public ID Cloudinary dengan Regex ===
-// Ini jauh lebih aman daripada split string manual
+/// === HELPER UTAMA: Ekstrak Public ID Cloudinary (SUPER ROBUST VERSION) ===
 const getCloudinaryPublicId = (url) => {
+  if (!url) return null;
   try {
-    // Regex untuk menangkap teks setelah '/upload/' (dan versi v123..) sampai sebelum extension
-    // Contoh: .../upload/v12345/lumastore_products/sepatu.jpg -> lumastore_products/sepatu
-    const regex = /\/upload\/(?:v\d+\/)?(.+)\.[^.]+$/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
+    // 1. Hapus Query Parameters (?v=123 dll) agar tidak mengganggu parsing
+    const urlWithoutQuery = url.split("?")[0];
+
+    // 2. Cari posisi '/upload/'
+    const splitPath = urlWithoutQuery.split("/upload/");
+    if (splitPath.length < 2) return null;
+
+    // 3. Ambil bagian setelah '/upload/' (contoh: v123456/lumastore/sepatu.jpg)
+    let publicIdWithVersion = splitPath[1];
+
+    // 4. Hapus Version Prefix (v12345/) jika ada
+    // Cloudinary version selalu diawali 'v' diikuti angka dan '/'
+    publicIdWithVersion = publicIdWithVersion.replace(/^v\d+\//, "");
+
+    // 5. Hapus Extension (.jpg, .png) di akhir
+    // Kita split titik, buang bagian terakhir (ext), lalu gabung lagi (jaga-jaga nama file ada titiknya)
+    const parts = publicIdWithVersion.split(".");
+    if (parts.length > 1) {
+      parts.pop(); // Buang extension
+    }
+
+    return parts.join("."); // Return ID murni (contoh: "lumastore/sepatu")
   } catch (error) {
     console.error("Gagal ekstrak public ID:", error);
     return null;
@@ -239,37 +256,46 @@ const deleteProduct = async (req, res) => {
     }
 
     const product = existing[0];
-    let imagesToDelete = [];
+
+    // Gunakan SET untuk otomatis membuang URL duplikat
+    // (Misal: image_url sama dengan salah satu item di images array)
+    const uniqueUrls = new Set();
 
     // 2. Kumpulkan URL dari JSON Array 'images'
     if (product.images) {
       const parsed = safeParseJSON(product.images);
       parsed.forEach((img) => {
         const url = typeof img === "object" ? img.url : img;
-        if (url) imagesToDelete.push(url);
+        if (url) uniqueUrls.add(url);
       });
     }
 
-    // 3. Tambahkan Main Image (legacy) jika belum ada
-    if (product.image_url && !imagesToDelete.includes(product.image_url)) {
-      imagesToDelete.push(product.image_url);
+    // 3. Tambahkan Main Image (legacy)
+    if (product.image_url) {
+      uniqueUrls.add(product.image_url);
     }
 
-    // 4. Hapus dari Database dulu (Supaya user tidak melihat produknya lagi)
+    // Konversi Set kembali ke Array
+    const imagesToDelete = Array.from(uniqueUrls);
+
+    // 4. Hapus dari Database dulu
     await db.query("DELETE FROM products WHERE id = ?", [id]);
 
-    // 5. Hapus File di Cloudinary/Local (DENGAN AWAIT)
+    // 5. Hapus File di Cloudinary/Local
     if (imagesToDelete.length > 0) {
-      // === KUNCI PERBAIKAN: Tambahkan 'await' di sini ===
-      // Server akan diam menunggu sampai Cloudinary selesai hapus semua file.
-      await Promise.allSettled(imagesToDelete.map((url) => deleteFile(url)));
-      console.log(`[Cleanup] Berhasil membersihkan ${imagesToDelete.length} gambar.`);
+      console.log(`[Cleanup] Menghapus ${imagesToDelete.length} file unik...`);
+
+      // Menggunakan Promise.allSettled agar jika 1 gagal, yang lain tetap terhapus
+      const results = await Promise.allSettled(imagesToDelete.map((url) => deleteFile(url)));
+
+      // (Opsional) Log hasil hapus
+      const successCount = results.filter((r) => r.status === "fulfilled").length;
+      console.log(`[Cleanup] Sukses hapus: ${successCount}/${imagesToDelete.length}`);
     }
 
     res.status(200).json({ success: true, message: "Produk dan semua gambar berhasil dihapus tuntas!" });
   } catch (error) {
     console.error("Error deleteProduct:", error);
-    // Fallback error handling (Foreign Key, dll)
     if (error.code === "ER_ROW_IS_REFERENCED_2") {
       await db.query("UPDATE products SET is_deleted = 1 WHERE id = ?", [id]);
       return res.status(200).json({ success: true, message: "Produk diarsipkan (ada riwayat order)." });

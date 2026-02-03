@@ -193,6 +193,12 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
   };
 
   const removeItem = (id) => {
+    // === FIX: Validasi Minimal 1 Gambar ===
+    if (items.length <= 1) {
+      alertError("Minimal harus menyisakan 1 foto produk!");
+      return; // Stop proses hapus
+    }
+
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
