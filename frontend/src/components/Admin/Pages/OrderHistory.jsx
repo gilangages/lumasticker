@@ -21,6 +21,13 @@ export default function OrderHistory() {
       const responseBody = await response.json();
       console.log(responseBody);
 
+      if (response.status === 401 || response.status === 403) {
+        await alertError("Sesi anda telah berakhir. Silakan login kembali.");
+        setToken(""); // Bersihkan state token
+        navigate("/admin/login"); // Tendang ke login
+        return; // Stop eksekusi
+      }
+
       if (response.status === 200) {
         setOrders(responseBody.data || []);
       } else {
