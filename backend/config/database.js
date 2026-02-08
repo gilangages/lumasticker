@@ -1,3 +1,4 @@
+// backend/config/database.js
 const mysql = require("mysql2");
 require("dotenv").config();
 
@@ -11,11 +12,13 @@ const commonConfig = {
   charset: "utf8mb4", // [FIX 1] Paksa utf8mb4 agar driver tidak bingung dengan cesu8
 };
 
-// Cek apakah ada DATABASE_URL di .env (Prioritas untuk TiDB/Production)
-if (process.env.DATABASE_URL) {
-  if (process.env.NODE_ENV !== "test") {
-    console.log("🌐 Menggunakan koneksi Cloud (TiDB)...");
-  }
+// Cek Environment: Apakah sedang di Production?
+const isProduction = process.env.NODE_ENV === "production";
+
+// [LOGIC BARU] Hanya gunakan TiDB (DATABASE_URL) jika BENAR-BENAR di Production
+// Atau jika kita sengaja memaksa lewat variabel khusus (opsional, tapi aman)
+if (isProduction && process.env.DATABASE_URL) {
+  console.log("🌐 [Production] Menggunakan koneksi Cloud (TiDB)...");
 
   pool = mysql.createPool({
     uri: process.env.DATABASE_URL,
@@ -26,8 +29,9 @@ if (process.env.DATABASE_URL) {
     },
   });
 } else {
+  // Jika di Local / Development / Test, gunakan settingan Localhost
   if (process.env.NODE_ENV !== "test") {
-    console.log("🏠 Menggunakan koneksi Localhost...");
+    console.log("🏠 [Development] Menggunakan koneksi Localhost...");
   }
 
   pool = mysql.createPool({
@@ -43,11 +47,11 @@ if (process.env.DATABASE_URL) {
 const db = pool.promise();
 
 // [FIX 2] Jangan jalankan "Cek Koneksi" saat sedang Test (Jest)
-// Ini mencegah error "Jest has been torn down" karena koneksi async yang telat.
 if (process.env.NODE_ENV !== "test") {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("❌ Gagal Terhubung ke Database:", err.message);
+      console.error("   Pastikan XAMPP/MySQL Local sudah nyala jika di Development!");
     } else {
       console.log("✅ Berhasil Terhubung ke Database!");
       connection.release();

@@ -4,6 +4,7 @@ const express = require("express");
 const productController = require("../controllers/productController");
 
 // === 1. MOCK DATABASE ===
+// Kita mock 'query' agar test TIDAK butuh koneksi DB asli (aman & cepat)
 jest.mock("../config/database", () => ({
   query: jest.fn(),
 }));
@@ -23,10 +24,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // === 4. MOCK MIDDLEWARE (REVISI) ===
 const mockUploadMiddleware = (req, res, next) => {
-  // LOGIC BARU: Cek Environment Variable langsung, bukan property req
+  // LOGIC BARU: Cek Environment Variable langsung
   const isProduction = process.env.NODE_ENV === "production";
 
-  // Inject file palsu
+  // Simulasi file yang diupload
   req.files = [
     {
       fieldname: "images",
@@ -35,7 +36,7 @@ const mockUploadMiddleware = (req, res, next) => {
       mimetype: "image/jpeg",
       destination: "public/uploads",
       filename: "test-sticker-123.jpg",
-      // Jika ENV production, kita kasih URL Cloudinary. Jika tidak, kasih path lokal.
+      // Jika ENV production, mock path Cloudinary. Jika Dev, path local.
       path: isProduction
         ? "https://res.cloudinary.com/demo/image/upload/sample.jpg"
         : "public/uploads/test-sticker-123.jpg",
@@ -45,26 +46,28 @@ const mockUploadMiddleware = (req, res, next) => {
   next();
 };
 
+// Route Test
 app.post("/api/products", mockUploadMiddleware, productController.createProduct);
 
 describe("POST /api/products - Upload Logic", () => {
   const OLD_ENV = process.env;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.resetModules();
-    process.env = { ...OLD_ENV }; // Reset env bersih setiap test
+    jest.clearAllMocks(); // Hapus jejak panggilan fungsi sebelumnya
+    jest.resetModules(); // Reset module cache agar env baru terbaca
+    process.env = { ...OLD_ENV }; // Reset env bersih setiap test dimulai
   });
 
   afterAll(() => {
-    process.env = OLD_ENV;
+    process.env = OLD_ENV; // Kembalikan env asli setelah semua test selesai
   });
 
   test("Should create product with CLOUDINARY URL in PRODUCTION", async () => {
     // 1. Set Environment ke Production
     process.env.NODE_ENV = "production";
+    process.env.API_BASE_URL = "https://api.lumasticker.com";
 
-    // 2. Mock DB response
+    // 2. Mock DB response (Simulasi sukses insert)
     db.query.mockResolvedValue([{ insertId: 100 }]);
 
     // 3. Request
@@ -76,23 +79,20 @@ describe("POST /api/products - Upload Logic", () => {
         description: "Deskripsi Pro",
         image_labels: JSON.stringify(["Tampak Depan"]),
       });
-    // Catatan: Kita tidak butuh .use() lagi karena middleware sudah pintar baca ENV
 
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toBe(true);
 
     const savedImage = res.body.data.images[0];
 
-    // Debugging (opsional, bisa dihapus)
-    // console.log("Output URL di Test:", savedImage.url);
-
+    // Pastikan URL yang tersimpan adalah link Cloudinary
     expect(savedImage.url).toContain("https://res.cloudinary.com");
   });
 
   test("Should create product with LOCALHOST URL in DEVELOPMENT", async () => {
     // 1. Set Environment ke Development
     process.env.NODE_ENV = "development";
-    process.env.API_BASE_URL = "http://localhost:3000"; // Paksa Base URL statis
+    process.env.API_BASE_URL = "http://localhost:3000"; // Simulasi Base URL
 
     // 2. Mock DB
     db.query.mockResolvedValue([{ insertId: 101 }]);
@@ -110,14 +110,17 @@ describe("POST /api/products - Upload Logic", () => {
     expect(res.statusCode).toBe(201);
 
     const savedImage = res.body.data.images[0];
-    // Controller akan menggabungkan API_BASE_URL + path lokal dari middleware
+    // Controller akan menggabungkan API_BASE_URL + path lokal
+    // Hasil: http://localhost:3000/uploads/test-sticker-123.jpg
     expect(savedImage.url).toBe("http://localhost:3000/uploads/test-sticker-123.jpg");
   });
 
   test("Should fail if required fields are missing", async () => {
+    // Test validasi input
     const res = await request(app).post("/api/products").send({
-      price: 15000, // Nama hilang
+      price: 15000,
       description: "Tanpa Nama",
+      // name tidak dikirim
     });
 
     expect(res.statusCode).toBe(400);
