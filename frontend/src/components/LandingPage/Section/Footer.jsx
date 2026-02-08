@@ -21,7 +21,7 @@ export const Footer = () => {
             onDragStart={(e) => e.preventDefault()}
             src={logoLuma}
             alt="LumaSticker Logo"
-            className="h-24 w-auto object-contain mb-2 hover:transform hover:scale-110 transition-transform"
+            className="h-32 md:h-24 w-auto object-contain mb-2 hover:transform hover:scale-110 transition-transform"
           />
           <div>
             <h3 className="font-black text-2xl text-[#3E362E]">

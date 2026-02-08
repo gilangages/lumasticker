@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { Navbar } from "./Section/Navbar";
 import { Footer } from "./Section/Footer";
+import { FloatingWhatsAppButton } from "./FloatingWhatsAppButton";
 
 export default function PrivacyPolicy() {
   useEffect(() => {
@@ -16,32 +17,48 @@ export default function PrivacyPolicy() {
         <p className="text-[#6B5E51] mb-10">Terakhir diperbarui: {new Date().toLocaleDateString("id-ID")}</p>
 
         <div className="space-y-8 text-sm md:text-base leading-relaxed text-[#6B5E51]">
+          {/* BAGIAN 1: DATA YANG DIKUMPULKAN */}
           <section>
-            <h2 className="text-xl font-bold text-[#3E362E] mb-3">1. Keamanan Data</h2>
+            <h2 className="text-xl font-bold text-[#3E362E] mb-3">1. Data yang Kami Kumpulkan</h2>
             <p>
-              Di LumaSticker, kami <strong>tidak mengumpulkan data pribadi</strong> (seperti Nama atau Email) melalui
-              website ini.
+              Untuk menjaga privasi dan keamanan Anda, LumaSticker hanya mengumpulkan data yang esensial untuk keperluan
+              akses produk, yaitu:
             </p>
-            <p className="mt-2">
-              Seluruh proses transaksi dilakukan secara langsung melalui <strong>WhatsApp</strong>. Data percakapan dan
-              bukti transfer Anda dilindungi oleh kebijakan privasi WhatsApp (End-to-End Encryption).
-            </p>
+            <ul className="list-disc pl-5 mt-2">
+              <li>
+                <strong>Alamat Email (Gmail):</strong> Wajib diisi saat checkout untuk memberikan izin akses
+                (permission) ke file produk di Google Drive.
+              </li>
+            </ul>
           </section>
 
+          {/* BAGIAN 2: PENGGUNAAN INFORMASI */}
           <section>
             <h2 className="text-xl font-bold text-[#3E362E] mb-3">2. Penggunaan Informasi</h2>
-            <p>Nomor WhatsApp yang Anda gunakan untuk menghubungi kami hanya akan digunakan untuk keperluan:</p>
+            <p>Alamat Email yang Anda berikan semata-mata digunakan untuk:</p>
             <ul className="list-disc pl-5 mt-2">
-              <li>Konfirmasi pembayaran pesanan.</li>
-              <li>Mengirimkan link download produk yang telah dibeli.</li>
+              <li>
+                Menambahkan akun Anda ke daftar <em>"Allowed Viewers"</em> di folder Google Drive produk yang Anda beli.
+              </li>
+              <li>Mengirimkan notifikasi terkait akses file (jika diperlukan).</li>
             </ul>
             <p className="mt-2 font-bold italic">
-              Kami tidak akan melakukan spam atau membagikan nomor Anda ke pihak lain.
+              Kami menjamin tidak akan menjual atau membagikan email Anda kepada pihak ketiga manapun.
             </p>
           </section>
 
+          {/* BAGIAN 3: TRANSAKSI (Ganti kalimat negatif jadi penjelasan alur) */}
           <section>
-            <h2 className="text-xl font-bold text-[#3E362E] mb-3">3. Hubungi Kami</h2>
+            <h2 className="text-xl font-bold text-[#3E362E] mb-3">3. Transaksi & Pembayaran</h2>
+            <p>
+              Seluruh proses konfirmasi pembayaran dilakukan secara langsung melalui <strong>WhatsApp</strong>. Hal ini
+              dilakukan untuk memastikan keamanan transaksi dan memudahkan komunikasi Anda dengan Admin.
+            </p>
+          </section>
+
+          {/* BAGIAN 4: KONTAK */}
+          <section>
+            <h2 className="text-xl font-bold text-[#3E362E] mb-3">4. Hubungi Kami</h2>
             <p>
               Pertanyaan seputar privasi dapat dikirim ke:
               <span className="font-bold text-[#3E362E]"> stickerluma@gmail.com</span>
@@ -50,6 +67,7 @@ export default function PrivacyPolicy() {
         </div>
       </main>
       <Footer />
+      <FloatingWhatsAppButton />
     </div>
   );
 }
