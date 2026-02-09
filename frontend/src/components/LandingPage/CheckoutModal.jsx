@@ -1,4 +1,14 @@
-import { X, Lock, ChevronLeft, ChevronRight, Image as ImageIcon, Mail, Check, MessageCircle } from "lucide-react";
+import {
+  X,
+  Lock,
+  ChevronLeft,
+  ChevronRight,
+  Image as ImageIcon,
+  Mail,
+  Check,
+  MessageCircle,
+  AlertCircle,
+} from "lucide-react"; // [MODIFIKASI] Tambah AlertCircle
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router";
 import ReactMarkdown from "react-markdown";
@@ -7,12 +17,19 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
   // --- STATE BARU: Email ---
   const [email, setEmail] = useState("");
 
+  // [MODIFIKASI] State untuk error handling
+  const [errors, setErrors] = useState({ email: false, agreement: false });
+
   const [currentImgIdx, setCurrentImgIdx] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
 
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
+
+  // [MODIFIKASI] Ref untuk auto-scroll target
+  const emailInputRef = useRef(null);
+  const agreementRef = useRef(null);
 
   // --- NORMALISASI DATA IMAGES (TIDAK DIUBAH) ---
   const getNormalizedImages = () => {
@@ -97,9 +114,41 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
     touchEndX.current = null;
   };
 
+  // [MODIFIKASI] Logic Submit Baru: Validasi saat klik + Auto Scroll
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!isAgreed || !email) return;
+
+    // Reset error state
+    setErrors({ email: false, agreement: false });
+
+    let hasError = false;
+    let newErrors = { email: false, agreement: false };
+
+    // Cek Email
+    if (!email) {
+      newErrors.email = true;
+      hasError = true;
+      // Scroll ke input email
+      if (emailInputRef.current) {
+        emailInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Fokus ke input agar user bisa langsung ngetik (opsional tapi bagus untuk UX)
+        // Kita cari elemen <input> di dalam div ref
+        const inputElement = emailInputRef.current.querySelector("input");
+        if (inputElement) inputElement.focus();
+      }
+    }
+    // Cek Agreement (hanya scroll jika email sudah aman agar tidak rebutan scroll)
+    else if (!isAgreed) {
+      newErrors.agreement = true;
+      hasError = true;
+      if (agreementRef.current) {
+        agreementRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    setErrors(newErrors);
+
+    if (hasError) return;
 
     onSubmit({ ...product, buyerEmail: email });
   };
@@ -224,22 +273,47 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
 
                 {/* FORM INPUTS */}
                 <div className="space-y-4">
-                  <div className="bg-white p-1 rounded-xl border-2 border-[#E5E0D8] focus-within:border-[#3E362E] transition-colors relative group">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#3E362E]/40 group-focus-within:text-[#3E362E]">
+                  {/* [MODIFIKASI] Wrapper Input Email dengan Ref & Error Style */}
+                  <div
+                    ref={emailInputRef}
+                    className={`bg-white p-1 rounded-xl border-2 transition-colors relative group ${
+                      errors.email
+                        ? "border-red-500 shadow-[0_0_0_2px_rgba(239,68,68,0.1)]"
+                        : "border-[#E5E0D8] focus-within:border-[#3E362E]"
+                    }`}>
+                    <div
+                      className={`absolute left-3 top-1/2 -translate-y-1/2 ${errors.email ? "text-red-500" : "text-[#3E362E]/40 group-focus-within:text-[#3E362E]"}`}>
                       <Mail size={18} />
                     </div>
                     <input
                       type="email"
-                      required
+                      // required -> dihapus agar kita bisa handle validasi sendiri
                       placeholder="Masukkan Email Gmail (Wajib)"
                       className="w-full pl-10 pr-4 py-3 bg-transparent text-[#3E362E] font-medium outline-none placeholder:text-[#3E362E]/30 text-sm md:text-base"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errors.email) setErrors((prev) => ({ ...prev, email: false })); // Hapus error saat ngetik
+                      }}
                     />
+                    {/* Icon Alert Error */}
+                    {errors.email && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 animate-pulse">
+                        <AlertCircle size={18} />
+                      </div>
+                    )}
                   </div>
-                  <p className="text-[10px] text-[#6B5E51]/80 px-1 -mt-2 mb-2 italic">
-                    *Email digunakan untuk memberi akses file di Google Drive.
-                  </p>
+
+                  {/* Pesan Error atau Helper Text */}
+                  {errors.email ? (
+                    <p className="text-[10px] text-red-500 font-bold px-1 -mt-2 mb-2 animate-bounce">
+                      *Ups! Email wajib diisi dulu ya.
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-[#6B5E51]/80 px-1 -mt-2 mb-2 italic">
+                      *Email digunakan untuk memberi akses file di Google Drive.
+                    </p>
+                  )}
 
                   <div className="bg-[#F3F0E9] p-4 rounded-xl border border-[#E5E0D8] space-y-2">
                     <div className="flex items-center gap-2">
@@ -259,34 +333,51 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
                     </ul>
                   </div>
 
-                  <div className="pt-2">
+                  <div className="pt-2" ref={agreementRef}>
+                    {" "}
+                    {/* [MODIFIKASI] Ref untuk Agreement */}
                     <div
                       className="flex items-start gap-3 group cursor-pointer select-none"
-                      onClick={() => setIsAgreed(!isAgreed)}>
+                      onClick={() => {
+                        setIsAgreed(!isAgreed);
+                        if (errors.agreement) setErrors((prev) => ({ ...prev, agreement: false })); // Hapus error saat klik
+                      }}>
+                      {/* [MODIFIKASI] Visual error pada checkbox box */}
                       <div
                         className={`w-5 h-5 mt-0.5 shrink-0 rounded border-2 flex items-center justify-center transition-all duration-200 ${
                           isAgreed
                             ? "bg-[#3E362E] border-[#3E362E]"
-                            : "bg-white border-[#E5E0D8] group-hover:border-[#8DA399]"
+                            : errors.agreement
+                              ? "bg-red-50 border-red-500 animate-pulse" // Style error
+                              : "bg-white border-[#E5E0D8] group-hover:border-[#8DA399]"
                         }`}>
                         {isAgreed && <Check size={14} className="text-[#FDFCF8]" strokeWidth={4} />}
                       </div>
 
-                      <p className="text-xs text-[#6B5E51] font-medium leading-snug">
-                        Saya menyetujui{" "}
-                        <Link
-                          to="/terms"
-                          className="underline decoration-dotted hover:text-[#3E362E] transition-colors">
-                          Syarat & Ketentuan
-                        </Link>{" "}
-                        serta{" "}
-                        <Link
-                          to="/privacy"
-                          className="underline decoration-dotted hover:text-[#3E362E] transition-colors">
-                          Kebijakan Privasi
-                        </Link>
-                        .
-                      </p>
+                      <div className="flex flex-col">
+                        <p
+                          className={`text-xs font-medium leading-snug ${errors.agreement ? "text-red-500" : "text-[#6B5E51]"}`}>
+                          Saya menyetujui{" "}
+                          <Link
+                            to="/terms"
+                            className="underline decoration-dotted hover:text-[#3E362E] transition-colors">
+                            Syarat & Ketentuan
+                          </Link>{" "}
+                          serta{" "}
+                          <Link
+                            to="/privacy"
+                            className="underline decoration-dotted hover:text-[#3E362E] transition-colors">
+                            Kebijakan Privasi
+                          </Link>
+                          .
+                        </p>
+                        {/* Pesan Error Kecil */}
+                        {errors.agreement && (
+                          <span className="text-[10px] text-red-500 font-bold mt-1">
+                            *Mohon dicentang untuk melanjutkan.
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -306,14 +397,12 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
 
                   <button
                     type="submit"
-                    disabled={!isAgreed || !email}
-                    className={
-                      isAgreed && email
-                        ? "w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-black py-4 rounded-xl shadow-[4px_4px_0px_0px_rgba(32,189,90,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all flex justify-center items-center gap-3 uppercase tracking-widest text-sm group border-2 border-[#25D366]"
-                        : "w-full bg-[#E5E0D8] text-[#3E362E]/40 font-black py-4 rounded-xl flex justify-center items-center gap-3 uppercase tracking-widest text-sm border-2 border-[#E5E0D8] cursor-not-allowed"
-                    }>
+                    // [MODIFIKASI] Disabled dihapus agar tombol selalu bisa diklik untuk trigger validasi
+                    // Style diganti menjadi selalu "Active Green"
+                    className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-black py-4 rounded-xl shadow-[4px_4px_0px_0px_rgba(32,189,90,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all flex justify-center items-center gap-3 uppercase tracking-widest text-sm group border-2 border-[#25D366]">
                     <MessageCircle
                       size={20}
+                      // Rotasi icon hanya saat form valid (opsional, tapi manis)
                       className={isAgreed && email ? "group-hover:-rotate-12 transition-transform" : ""}
                       fill="white"
                     />
