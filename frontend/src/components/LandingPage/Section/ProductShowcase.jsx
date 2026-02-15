@@ -41,11 +41,11 @@ export const ProductShowcase = ({ products, loading, onBuy }) => {
               <Sparkles size={28} />
             </div>
             <div>
-              <h4 className="font-bold text-xl text-[#3E362E] mb-1">Karya Berikutnya...</h4>
+              <h4 className="font-bold text-xl text-[#3E362E] mb-1">Abstrak Berikutnya...</h4>
               {/* TEKS SANTAI: Tidak janji kapan, tapi memberi harapan */}
               <p className="text-[#6B5E51] leading-relaxed">
-                Aku lagi nyiapin tema-tema baru yang lebih seru nih. Pantengin terus ya, siapa tau ada yang cocok sama
-                seleramu nanti! ✨
+                Aku lagi nyiapin tema-tema baru yang lebih abstrak nih. Pantengin terus ya, siapa tau ada yang cocok
+                sama seleramu nanti!
               </p>
             </div>
           </div>
