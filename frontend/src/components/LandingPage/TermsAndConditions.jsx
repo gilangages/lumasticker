@@ -10,74 +10,96 @@ export default function TermsAndConditions() {
   }, []);
 
   return (
-    <div className="bg-[#FDFCF8] min-h-screen font-sans text-[#3E362E]">
+    <div className="bg-[#121214] min-h-screen font-sans text-[#E0D7D7]">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-6 pt-32 pb-20">
-        <h1 className="text-4xl font-black mb-2 text-[#3E362E]">Syarat & Ketentuan</h1>
-        <p className="text-[#6B5E51] mb-10">Terakhir diperbarui: {new Date().toLocaleDateString("id-ID")}</p>
+      <main className="max-w-4xl mx-auto px-6 pt-40 pb-20 relative">
+        {/* Dekorasi halus di background */}
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-64 h-64 bg-[#8287ac]/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-        <div className="space-y-8 text-sm md:text-base leading-relaxed text-[#6B5E51]">
-          {/* 1. Definisi Produk */}
-          <section>
-            <h2 className="text-xl font-bold text-[#3E362E] mb-3">1. Produk Digital</h2>
-            <p>
-              Produk yang dijual di LumaSticker adalah <strong>aset digital (softcopy)</strong>.
-              <strong>Tidak ada produk fisik</strong> yang dikirim ke rumah.
-            </p>
-          </section>
+        <div className="relative z-10">
+          <h1 className="text-4xl md:text-5xl font-black mb-3 tracking-tighter uppercase">
+            Syarat & <span className="text-[#8287ac] italic opacity-80">Ketentuan</span>
+          </h1>
+          <p className="text-[#B8B3B6] mb-16 text-xs font-mono tracking-widest opacity-60 uppercase">
+            Terakhir diperbarui: {new Date().toLocaleDateString("id-ID")}
+          </p>
 
-          {/* 2. Pemesanan & Pembayaran */}
-          <section>
-            <h2 className="text-xl font-bold text-[#3E362E] mb-3">2. Pemesanan & Pembayaran</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>
-                Saat checkout, Anda <strong>wajib menyertakan alamat Email (Gmail)</strong> yang aktif.
-              </li>
-              <li>
-                Penyelesaian pembayaran dilakukan secara manual via transfer Bank/E-Wallet dan dikonfirmasi melalui{" "}
-                <strong>WhatsApp</strong>.
-              </li>
-            </ul>
-          </section>
+          <div className="space-y-12 text-sm md:text-base leading-relaxed text-[#B8B3B6] font-light">
+            {/* 1. Definisi Produk */}
+            <section className="border-l border-[#8287ac]/20 pl-6 md:pl-8">
+              <h2 className="text-xl font-bold text-[#E0D7D7] mb-4 tracking-tight">1. Produk Digital</h2>
+              <p>
+                Produk yang dijual di LumaSticker adalah{" "}
+                <strong className="text-[#8287ac]">aset digital (softcopy)</strong>.
+                <strong className="text-[#8287ac]"> Tidak ada produk fisik</strong> yang dikirim ke rumah.
+              </p>
+            </section>
 
-          {/* 3. Pengiriman File */}
-          <section>
-            <h2 className="text-xl font-bold text-[#3E362E] mb-3">3. Pengiriman & Akses File</h2>
-            <p>
-              File disimpan secara aman di <strong>Google Drive</strong> dengan metode <em>Restricted Access</em>.
-            </p>
-            <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>
-                Setelah pembayaran terverifikasi, Admin akan memberikan akses ke email yang Anda masukkan saat checkout.
-              </li>
-              <li>
-                Pastikan email tersebut adalah <strong>Gmail</strong> agar bisa membuka folder Google Drive.
-              </li>
-              <li>Anda dilarang menyebarkan link atau memberikan akses akun Anda ke pihak lain.</li>
-            </ul>
-          </section>
+            {/* 2. Pemesanan & Pembayaran */}
+            <section className="border-l border-[#8287ac]/20 pl-6 md:pl-8">
+              <h2 className="text-xl font-bold text-[#E0D7D7] mb-4 tracking-tight">2. Pemesanan & Pembayaran</h2>
+              <ul className="list-disc pl-5 space-y-3 opacity-90">
+                <li>
+                  Saat checkout, Anda <strong className="text-[#8287ac]">wajib menyertakan alamat Email (Gmail)</strong>{" "}
+                  yang aktif.
+                </li>
+                <li>
+                  Penyelesaian pembayaran dilakukan secara manual via transfer Bank/E-Wallet dan dikonfirmasi melalui{" "}
+                  <strong className="text-[#8287ac]">WhatsApp</strong>.
+                </li>
+              </ul>
+            </section>
 
-          {/* 4. Kebijakan Refund */}
-          <section className="bg-[#F3F0E9] p-6 rounded-xl border border-[#E5E0D8]">
-            <h2 className="text-xl font-bold text-[#3E362E] mb-3">4. Kebijakan Pengembalian Dana (Refund)</h2>
-            <p className="mb-3">Karena sifat produk digital:</p>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>
-                <strong>Final:</strong> Tidak ada refund jika akses file sudah diberikan ke email Anda.
-              </li>
-              <li>
-                <strong>Garansi:</strong> Jika file rusak (corrupt), hubungi kami untuk mendapatkan link pengganti.
-              </li>
-            </ul>
-          </section>
+            {/* 3. Pengiriman File */}
+            <section className="border-l border-[#8287ac]/20 pl-6 md:pl-8">
+              <h2 className="text-xl font-bold text-[#E0D7D7] mb-4 tracking-tight">3. Pengiriman & Akses File</h2>
+              <p>
+                File disimpan secara aman di <strong className="text-[#8287ac]">Google Drive</strong> dengan metode{" "}
+                <em className="italic opacity-80 text-[#8287ac]">Restricted Access</em>.
+              </p>
+              <ul className="list-disc pl-5 mt-4 space-y-3 opacity-90">
+                <li>
+                  Setelah pembayaran terverifikasi, Admin akan memberikan akses ke email yang Anda masukkan saat
+                  checkout.
+                </li>
+                <li>
+                  Pastikan email tersebut adalah <strong className="text-[#8287ac]">Gmail</strong> agar bisa membuka
+                  folder Google Drive.
+                </li>
+                <li>Anda dilarang menyebarkan link atau memberikan akses akun Anda ke pihak lain.</li>
+              </ul>
+            </section>
 
-          {/* 5. Kontak */}
-          <section>
-            <h2 className="text-xl font-bold text-[#3E362E] mb-3">5. Bantuan</h2>
-            <p>Ada kendala akses Google Drive? Hubungi kami:</p>
-            <p className="font-bold mt-2 text-[#3E362E]">stickerluma@gmail.com</p>
-          </section>
+            {/* 4. Kebijakan Refund */}
+            <section className="bg-[#1F1F23]/50 p-8 rounded-none border border-[#8287ac]/10">
+              <h2 className="text-xl font-bold text-[#E0D7D7] mb-4 tracking-tight">
+                4. Kebijakan Pengembalian Dana (Refund)
+              </h2>
+              <p className="mb-4 opacity-90">Karena sifat produk digital:</p>
+              <ul className="list-disc pl-5 space-y-3 opacity-90">
+                <li>
+                  <strong className="text-[#8287ac]">Final:</strong> Tidak ada refund jika akses file sudah diberikan ke
+                  email Anda.
+                </li>
+                <li>
+                  <strong className="text-[#8287ac]">Garansi:</strong> Jika file rusak (corrupt), hubungi kami untuk
+                  mendapatkan link pengganti.
+                </li>
+              </ul>
+            </section>
+
+            {/* 5. Kontak */}
+            <section className="border-l border-[#8287ac]/20 pl-6 md:pl-8">
+              <h2 className="text-xl font-bold text-[#E0D7D7] mb-4 tracking-tight">5. Bantuan</h2>
+              <p>Ada kendala akses Google Drive? Hubungi kami:</p>
+              <a
+                href="mailto:stickerluma@gmail.com"
+                className="font-mono text-[#8287ac] mt-2 tracking-tight hover:underline cursor-pointer opacity-90">
+                stickerluma@gmail.com
+              </a>
+            </section>
+          </div>
         </div>
       </main>
 

@@ -58,7 +58,7 @@ export const HomePage = () => {
       // HAPUS timeoutPromise dan Promise.race
       // Kita ganti dengan fetch biasa yang akan menunggu sampai browser/server merespon
 
-      console.log("Memulai pengambilan data... Menunggu server Render bangun...");
+      console.log("Memulai pengambilan data... Menunggu server bangun...");
 
       const response = await getAllProducts(); // <--- Frontend akan menunggu disini, berapapun lamanya
 
@@ -145,8 +145,7 @@ export const HomePage = () => {
 
       {/* KONTEN UTAMA WEBSITE */}
       {/* Kita sembunyikan konten utama jika LoadingScreen sedang aktif agar rapi */}
-      <div
-        className={`min-h-screen flex flex-col font-sans text-[#3E362E] ${isInitialLoading || showErrorScreen ? "hidden" : ""}`}>
+      <div className={`min-h-screen flex flex-col font-sans ${isInitialLoading || showErrorScreen ? "hidden" : ""}`}>
         <Navbar />
         <div className="flex-grow">
           <Hero />
@@ -200,17 +199,12 @@ export const HomePage = () => {
 
       if (data.success) {
         const adminNumber = "6283824032460";
-        const message = `Halo Admin LumaSticker!
+        const message = `Halo, saya ingin mengambil arsip karya ini:
 
-Saya mau bungkus stiker ini:
-Nama produk: *${product.name}*
-Harga       :  Rp ${parseInt(product.price).toLocaleString("id-ID")}
+Karya: *${product.name}*
+Email: *${product.buyerEmail}*
 
-Email Gmail untuk akses Drive:
-*${product.buyerEmail}*
-
-Mohon dicek bukti transfer saya (terlampir).
-Terima kasih!`.trim();
+Berikut bukti transfernya. Terima kasih.`.trim();
 
         const waUrl = `https://wa.me/${adminNumber}?text=${encodeURIComponent(message)}`;
         window.open(waUrl, "_blank");
@@ -220,9 +214,9 @@ Terima kasih!`.trim();
     } catch (error) {
       console.error("Error Sistem:", error);
       const adminNumber = "6283824032460";
-      const message = `Halo Admin LumaSticker, saya mau beli ${product.name}.
-Email saya: ${product.buyerEmail || "-"}
-(Sistem Error, mohon bantu manual)`;
+      const message = `Halo, ada kendala sistem saat ingin mengambil arsip ${product.name}.
+Email: ${product.buyerEmail || "-"}
+(Mohon bantu proses manual)`;
 
       window.open(`https://wa.me/${adminNumber}?text=${encodeURIComponent(message)}`, "_blank");
     }

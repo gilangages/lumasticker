@@ -1,72 +1,67 @@
-import { Ghost, Cat, Cookie, Bird, Sparkles } from "lucide-react";
+// gilangages/lumasticker/lumasticker-main/frontend/src/components/LandingPage/Section/Hero.jsx
+
+import { Ghost, Moon, Eye, CloudRain, Zap, Fingerprint } from "lucide-react";
 
 export const Hero = () => {
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
-    } else {
-      console.warn(`Element dengan id "${id}" tidak ditemukan. Cek ProductShowcase.jsx`);
     }
   };
 
   return (
-    <section className="pt-44 md:pt-35 pb-24 px-6 text-center max-w-6xl mx-auto relative overflow-hidden">
-      {/* --- DEKORASI STIKER (POSISI DIPERBAIKI) --- */}
-      {/* Sekarang posisinya "left-4" (masuk dkit), bukan "-left-4" (keluar) */}
-
-      {/* 1. Hantu (Kiri Atas - Jauh dari button) */}
-      <div className="absolute top-24 left-4 md:top-32 md:left-20 bg-white p-3 rounded-2xl border-2 border-[#E5E0D8] shadow-[3px_3px_0px_0px_rgba(62,54,46,0.1)] rotate-[-6deg] animate-float-slow z-0 opacity-90">
-        <Ghost size={28} className="text-[#3E362E] fill-[#EAE7DF]" />
+    <section className="pt-44 md:pt-40 pb-24 px-6 text-center max-w-6xl mx-auto relative overflow-hidden">
+      {/* --- ELEMEN DEKORATIF --- */}
+      <div className="absolute top-24 left-4 md:top-32 md:left-20 bg-[#1F1F23] p-4 rounded-xl border border-[#8287ac]/20 shadow-2xl rotate-[-8deg] animate-float-slow z-0 opacity-40">
+        <Ghost size={32} className="text-[#8287ac]" />
       </div>
 
-      {/* 2. Kucing (Kanan Atas - Jauh dari button) */}
-      <div className="absolute top-28 right-4 md:top-40 md:right-20 bg-white p-3 rounded-full border-2 border-[#E5E0D8] shadow-[3px_3px_0px_0px_rgba(62,54,46,0.1)] rotate-[6deg] animate-float-medium z-0 opacity-90 animation-delay-1000">
-        <Cat size={28} className="text-[#D68C76] fill-[#D68C76]/20" />
+      <div className="absolute top-28 right-4 md:top-40 md:right-24 bg-[#1F1F23] p-4 rounded-full border border-[#8287ac]/20 shadow-2xl rotate-[10deg] animate-float-medium z-0 opacity-40">
+        <Eye size={32} className="text-[#8287ac]" />
       </div>
 
-      {/* 3. Biskuit (Kiri Bawah - Digeser biar gak kena button di HP) */}
-      {/* Di HP kita taruh agak pinggir (left-2), di Desktop agak tengah (left-1/4) */}
-      <div className="absolute bottom-10 left-2 md:bottom-20 md:left-[20%] text-[#8DA399] animate-float-fast -z-10 rotate-12 opacity-60">
-        <Cookie size={40} />
+      <div className="absolute bottom-10 left-4 md:bottom-24 md:left-[15%] text-[#8287ac]/20 animate-float-fast -z-10 rotate-[-15deg]">
+        <CloudRain size={56} />
       </div>
 
-      {/* 4. Burung (Kanan Bawah - Digeser biar gak kena button di HP) */}
-      <div className="absolute bottom-12 right-2 md:bottom-24 md:right-[20%] text-[#3E362E]/30 animate-float-slow -z-10 -rotate-12">
-        <Bird size={48} />
+      <div className="absolute bottom-12 right-4 md:bottom-32 md:right-[15%] text-[#8287ac]/10 animate-float-slow -z-10 rotate-12">
+        <Fingerprint size={64} />
       </div>
 
-      {/* 5. Sparkle Tambahan (Tengah atas dikit) */}
-      <div className="absolute top-40 left-1/2 -translate-x-1/2 -mt-18 md:-mt-14 text-[#D68C76]/40 animate-pulse -z-10">
-        <Sparkles size={32} />
+      <div className="absolute top-26 left-1/2 -translate-x-1/2 text-[#8287ac]/30 animate-pulse -z-10">
+        <Zap size={40} />
       </div>
 
-      {/* --- BACKGROUND BLOB --- */}
-      <div className="absolute top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-[#E8D5C4]/40 rounded-full blur-[80px] -z-20 mix-blend-multiply"></div>
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 w-80 h-80 bg-[#8287ac]/10 rounded-full blur-[120px] -z-20"></div>
 
       {/* --- KONTEN UTAMA --- */}
-      <div className="relative z-10 -mt-12 md:mt-0">
-        <span className="bg-white border-2 border-[#3E362E] text-[#3E362E] px-4 py-1.5 rounded-lg text-sm font-bold shadow-[4px_4px_0px_0px_rgba(62,54,46,1)] mb-8 inline-block rotate-[-2deg]">
-          ✂️ Printable Stickers
+      <div className="relative z-10 -mt-8 md:mt-0">
+        <span className="bg-[#1F1F23] border border-[#8287ac]/30 text-[#8287ac] px-5 py-1.5 rounded-full text-xs font-mono tracking-[0.2em] mb-10 inline-block uppercase opacity-80">
+          // Arsip Coretan Acak //
         </span>
 
-        <h1 className="text-4xl md:text-6xl font-black text-[#3E362E] mb-6 leading-tight tracking-tight">
-          Stiker Abstrak Buatan <br />
-          <span className="text-[#8DA399] underline decoration-[#D68C76] decoration-wavy decoration-4 underline-offset-4">
-            Sendiri.
+        <h1 className="text-5xl md:text-7xl font-black text-[#E0D7D7] mb-8 leading-[1.1] tracking-tighter">
+          Visualisasi dari <br />
+          <span className="text-[#8287ac] underline decoration-[#1F1F23] decoration-wavy underline-offset-8">
+            Kegaduhan Rasa.
           </span>
         </h1>
 
-        <p className="text-lg md:text-xl text-[#6B5E51] mb-10 max-w-xl mx-auto leading-relaxed font-medium">
-          Jika membeli maka akan dapat file digital (ZIP) yang bisa di<b>print sepuasnya</b>. Isinya sudah ada format A4
-          siap cetak & PNG transparan.
+        <p className="text-lg md:text-xl text-[#B8B3B6] mb-12 max-w-2xl mx-auto leading-relaxed font-light italic opacity-90">
+          Hanya kumpulan coretan yang lahir tanpa rencana. Simpan arsipnya, cetak sesukamu, atau biarkan ia sekadar
+          menemani ruang sunyimu.
         </p>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-center gap-6">
           <button
             onClick={() => scrollToSection("products")}
-            className="bg-[#3E362E] text-[#FDFCF8] px-8 py-3.5 rounded-xl font-black tracking-wide hover:bg-[#8DA399] hover:-translate-y-0.5 transition-all shadow-[4px_4px_0px_0px_rgba(141,163,153,1)] border-2 border-[#3E362E] active:translate-y-0 active:shadow-none cursor-pointer">
-            Lihat Abstrak
+            className="group relative bg-[#1F1F23] text-[#E0D7D7] px-10 py-4 rounded-sm font-bold tracking-widest overflow-hidden border border-[#8287ac]/30 transition-all hover:border-[#8287ac]">
+            <span className="relative z-10">JELAJAHI ARSIP</span>
+            <div className="absolute inset-0 bg-[#8287ac] translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+            <span className="absolute inset-0 z-20 flex items-center justify-center text-[#121214] opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-black">
+              BUKA VOID
+            </span>
           </button>
         </div>
       </div>

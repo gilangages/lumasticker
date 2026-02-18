@@ -1,31 +1,38 @@
+// gilangages/lumasticker/lumasticker-main/frontend/src/components/LandingPage/Section/WhatsAppSection.jsx
+
 export const WhatsAppSection = () => {
   return (
-    <section className="py-12 px-6 max-w-4xl mx-auto text-center mb-10">
-      <div className="bg-[#F3F0E9] rounded-3xl p-8 md:p-12 border-2 border-[#E5E0D8] relative overflow-hidden group hover:border-[#8DA399] transition-colors shadow-sm">
-        {/* Dekorasi Background */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#8DA399]/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#D68C76]/10 rounded-full blur-2xl -ml-10 -mb-10"></div>
+    <section className="py-24 px-6 max-w-4xl mx-auto text-center mb-10 border-t border-[#1F1F23]">
+      <div className="bg-[#1F1F23]/30 rounded-none p-10 md:p-16 border border-[#8287ac]/10 relative overflow-hidden group transition-all duration-500">
+        {/* Dekorasi Background: Subtle Glow (InkVoid Style) */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-[#8287ac]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-[#121214]/50 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none"></div>
 
-        <h3 className="text-2xl md:text-3xl font-black text-[#3E362E] mb-3 relative z-10">
-          Ada yang ingin ditanyakan?
+        <h3 className="text-3xl md:text-4xl font-black text-[#E0D7D7] mb-6 relative z-10 tracking-tighter uppercase">
+          Diskusi.
         </h3>
 
-        {/* DESKRIPSI BARU: Tidak menggurui, murni open chat */}
-        <p className="text-[#6B5E51] mb-8 text-lg relative z-10 max-w-xl mx-auto font-medium">
-          Masih ragu atau ada yang kurang jelas sebelum membeli? <br className="hidden md:block" />
-          Santai aja, chat aku langsung di WhatsApp ya.
+        {/* Deskripsi: Netral, jujur, dan tidak menggunakan kata "aku" atau gaya bahasa "sok asik" */}
+        <p className="text-[#B8B3B6] mb-12 text-base md:text-lg relative z-10 max-w-xl mx-auto font-light italic opacity-80 leading-relaxed">
+          Gunakan WhatsApp jika ada hal yang perlu ditanyakan terkait detail karya, format file, atau kendala dalam
+          proses cetak.
         </p>
 
         <a
-          href="https://wa.me/6283824032460?text=Halo%20kak,%20mau%20tanya%20soal%20stiker..."
+          href="https://wa.me/6283824032460?text=Halo,%20ada%20yang%20ingin%20didiskusikan%20terkait%20stiker..."
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#1ebd59] text-white px-8 py-3.5 rounded-xl font-bold shadow-[4px_4px_0px_0px_rgba(62,54,46,0.1)] hover:-translate-y-1 transition-all group relative z-10 border-2 border-transparent">
-          {/* Ikon WA SVG */}
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          className="inline-flex items-center gap-4 border border-[#25D366]/40 text-[#E0D7D7] px-10 py-4 rounded-none font-bold tracking-widest hover:bg-[#25D366]/10 transition-all group relative z-10 uppercase text-xs">
+          {/* Ikon WA: Dibuat lebih menyatu dengan tema (tidak mencolok) */}
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="currentColor"
+            className="text-[#25D366] opacity-70 group-hover:opacity-100 transition-opacity">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
           </svg>
-          Chat via WhatsApp
+          Hubungi via WhatsApp
         </a>
       </div>
     </section>

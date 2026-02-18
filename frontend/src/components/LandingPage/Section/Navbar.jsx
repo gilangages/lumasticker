@@ -43,98 +43,84 @@ export const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        isScrolled ? "bg-[#FDFCF8]/90 backdrop-blur-md shadow-sm py-3 border-b border-[#E5E0D8]" : "bg-transparent py-6"
+      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
+        // Menggunakan warna Deep Void dari gambarmu (#121214) saat discroll
+        isScrolled
+          ? "bg-[#121214]/90 backdrop-blur-lg shadow-2xl py-3 border-b border-[#1F1F23]"
+          : "bg-transparent py-6"
       }`}>
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
-        {/* LOGO */}
+        {/* LOGO: InkVoid */}
         <div className="flex items-center cursor-pointer group" onClick={handleLogoClick}>
-          <img
-            onContextMenu={(e) => e.preventDefault()}
-            onDragStart={(e) => e.preventDefault()}
-            src="./luma-sticker.png"
-            alt=""
-            className="h-12 w-auto"
-          />
-          <span className="font-black text-2xl text-[#3E362E] tracking-tight">
-            Luma<span className="text-[#8DA399]">Sticker</span>.
+          <span className="font-black text-2xl text-[#E0D7D7] tracking-tighter transition-all group-hover:tracking-normal">
+            Ink<span className="text-[#8287ac]">Void</span>.
           </span>
         </div>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-6">
+        {/* Desktop Menu: Wording yang lebih 'jujur' dan tidak memaksa */}
+        <div className="hidden md:flex items-center gap-8">
           <button
             onClick={() => handleNavigation("products")}
-            className="text-[#6B5E51] font-bold hover:text-[#3E362E] transition">
-            Koleksi
+            className="text-[#B8B3B6] text-sm font-medium hover:text-[#8287ac] transition-colors uppercase tracking-widest">
+            Karya
           </button>
           <button
             onClick={() => handleNavigation("howto")}
-            className="text-[#6B5E51] font-bold hover:text-[#3E362E] transition">
-            Cara Order
+            className="text-[#B8B3B6] text-sm font-medium hover:text-[#8287ac] transition-colors uppercase tracking-widest">
+            Proses
           </button>
-
-          {/* MENU BARU: KREATOR */}
           <button
             onClick={() => handleNavigation("creator")}
-            className="text-[#6B5E51] font-bold hover:text-[#3E362E] transition">
-            Kreator
+            className="text-[#B8B3B6] text-sm font-medium hover:text-[#8287ac] transition-colors uppercase tracking-widest">
+            Cerita
           </button>
-
-          <button
-            onClick={() => handleNavigation("benefits")}
-            className="text-[#6B5E51] font-bold hover:text-[#3E362E] transition">
-            Keunggulan
-          </button>
-
           <button
             onClick={() => handleNavigation("faq")}
-            className="text-[#6B5E51] font-bold hover:text-[#3E362E] transition">
-            Tanya Dulu
+            className="text-[#B8B3B6] text-sm font-medium hover:text-[#8287ac] transition-colors uppercase tracking-widest">
+            Tanya
           </button>
+
+          {/* Tombol Ambil Karya: Menggunakan aksen biru pudar dari gambarmu */}
           <button
             onClick={() => handleNavigation("products")}
-            className="bg-[#3E362E] text-[#FDFCF8] px-6 py-2 rounded-lg font-bold hover:bg-[#8DA399] hover:-translate-y-0.5 transition-all shadow-[3px_3px_0px_0px_rgba(141,163,153,1)]">
-            Beli Stiker
+            className="border border-[#8287ac]/30 text-[#E0D7D7] px-6 py-2 rounded-sm text-sm font-bold hover:bg-[#8287ac] hover:text-[#121214] transition-all duration-300 shadow-[4px_4px_0px_0px_rgba(130,135,172,0.2)] active:translate-y-1 active:shadow-none">
+            Miliki
           </button>
         </div>
 
         {/* Mobile Toggle */}
-        <button className="md:hidden text-[#3E362E] p-2" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-          {isMobileMenuOpen ? <X /> : <Menu />}
+        <button className="md:hidden text-[#B8B3B6] p-2" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu: Disesuaikan dengan tema gelap */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-[#FDFCF8] border-b border-[#E5E0D8] p-6 flex flex-col gap-4 shadow-xl">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-[#121214] border-b border-[#1F1F23] p-8 flex flex-col gap-6 shadow-2xl animate-slide-up">
           <button
             onClick={() => handleNavigation("products")}
-            className="text-left text-[#3E362E] font-bold py-2 border-b border-dashed border-[#E5E0D8]">
-            Koleksi
+            className="text-left text-[#E0D7D7] text-xl font-light tracking-widest border-l-2 border-[#8287ac] pl-4">
+            ARSIP KARYA
           </button>
           <button
             onClick={() => handleNavigation("howto")}
-            className="text-left text-[#3E362E] font-bold py-2 border-b border-dashed border-[#E5E0D8]">
-            Cara Order
+            className="text-left text-[#B8B3B6] text-xl font-light tracking-widest pl-4">
+            PANDUAN
           </button>
-
-          {/* MENU BARU MOBILE */}
           <button
             onClick={() => handleNavigation("creator")}
-            className="text-left text-[#3E362E] font-bold py-2 border-b border-dashed border-[#E5E0D8]">
-            Kreator
-          </button>
-
-          <button
-            onClick={() => handleNavigation("benefits")}
-            className="text-left text-[#3E362E] font-bold py-2 border-b border-dashed border-[#E5E0D8]">
-            Keunggulan
+            className="text-left text-[#B8B3B6] text-xl font-light tracking-widest pl-4">
+            CERITA
           </button>
           <button
             onClick={() => handleNavigation("faq")}
-            className="text-left text-[#3E362E] font-bold py-2 border-b border-dashed border-[#E5E0D8]">
-            Tanya Dulu
+            className="text-left text-[#B8B3B6] text-xl font-light tracking-widest pl-4">
+            TANYA
+          </button>
+          <button
+            onClick={() => handleNavigation("products")}
+            className="mt-4 bg-[#8287ac] text-[#121214] py-4 text-center font-black tracking-tighter">
+            Miliki
           </button>
         </div>
       )}

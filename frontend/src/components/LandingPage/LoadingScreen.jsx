@@ -1,74 +1,73 @@
 // frontend/src/components/LandingPage/LoadingScreen.jsx
 import React from "react";
-import lumaLogo from "../../assets/luma-sticker.png"; // Pastikan path ini sesuai dengan logo kamu
+import { Loader2, AlertCircle, RefreshCw, ArrowRight } from "lucide-react";
 
 export const LoadingScreen = ({ isLoading, isError, onContinue, onRetry }) => {
   if (!isLoading && !isError) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#fdfcf8] px-6 text-center font-sans text-[#3E362E]">
-      {/* BACKGROUND PATTERN (Sama dengan CSS global) */}
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#121214] px-6 text-center font-sans text-[#E0D7D7]">
+      {/* BACKGROUND PATTERN: Dark Dot Grid */}
       <div
-        className="absolute inset-0 opacity-40 pointer-events-none"
+        className="absolute inset-0 opacity-10 pointer-events-none"
         style={{
-          backgroundImage: "radial-gradient(#e5e0d8 1px, transparent 1px)",
-          backgroundSize: "20px 20px",
+          backgroundImage: "radial-gradient(#8287ac 1px, transparent 1px)",
+          backgroundSize: "30px 30px",
         }}></div>
 
-      <div className="relative z-10 max-w-md">
+      <div className="relative z-10 max-w-md w-full">
         {isLoading ? (
           // --- TAMPILAN LOADING ---
-          <div className="flex flex-col items-center animate-fade-in">
-            {/* Logo Bouncing */}
-            <div className="animate-bounce mb-6">
-              <img src={lumaLogo} alt="Loading..." className="w-24 h-24 object-contain" />
+          <div className="flex flex-col items-center">
+            <div className="mb-8">
+              <Loader2 size={48} className="text-[#8287ac] animate-spin opacity-50" />
             </div>
-            <h2 className="text-2xl font-bold text-[#8da399] mb-2">Sedang Menyiapkan Toko...</h2>
-            <p className="text-sm text-gray-500 animate-pulse">
-              Membangunkan server... Mohon tunggu sebentar, proses ini bergantung pada kecepatan server gratis kami.
+            <h2 className="text-xl font-bold tracking-widest uppercase mb-4">Menghubungkan...</h2>
+            <p className="text-xs text-[#B8B3B6] font-mono leading-relaxed opacity-60">
+              Menunggu respon dari server. Proses ini mungkin memakan waktu lebih lama karena keterbatasan layanan
+              gratis.
             </p>
           </div>
         ) : (
           // --- TAMPILAN ERROR / LIMIT ---
-          <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl border-2 border-[#d68c76] shadow-lg animate-slide-up">
-            <div className="w-16 h-16 bg-[#d68c76]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🍃</span>
+          <div className="bg-[#1F1F23]/50 border border-[#8287ac]/20 p-8 md:p-12 rounded-none shadow-2xl animate-fade-in">
+            <div className="w-16 h-16 border border-[#8287ac]/20 rounded-none flex items-center justify-center mx-auto mb-8 bg-[#121214]">
+              <AlertCircle size={32} className="text-[#8287ac]/60" />
             </div>
 
-            <h2 className="text-xl font-bold text-[#d68c76] mb-4">Server Sedang Istirahat</h2>
+            <h2 className="text-xl font-black text-[#E0D7D7] mb-6 tracking-tighter uppercase">Koneksi Terputus</h2>
 
-            <div className="text-left text-sm text-[#3E362E] space-y-3 mb-6 leading-relaxed">
-              <p>
-                <strong>Halo, Teman Luma!</strong> Mohon maaf atas ketidaknyamanan ini.
-              </p>
-              <p>
-                Website ini dikelola menggunakan layanan hosting backend versi gratis. Jika pesan ini muncul,
-                kemungkinan:
-              </p>
-              <ul className="list-disc pl-5 space-y-1 text-gray-600">
-                <li>Batas penggunaan data bulanan telah tercapai.</li>
-                <li>Server sedang sibuk atau mengalami kendala koneksi.</li>
+            <div className="text-left text-sm text-[#B8B3B6] space-y-4 mb-10 leading-relaxed font-light italic">
+              <p>Layanan backend sedang tidak menanggapi. Hal ini biasanya terjadi karena:</p>
+              <ul className="space-y-2 border-l border-[#8287ac]/20 pl-4 not-italic">
+                <li className="text-xs opacity-80">// Batas penggunaan data bulanan tercapai.</li>
+                <li className="text-xs opacity-80">// Masalah pada koneksi server.</li>
               </ul>
-              <p className="italic text-xs text-gray-400 mt-2 border-t pt-2">
-                *Data koleksi stiker akan kembali normal secara otomatis pada periode reset bulan depan.
+
+              {/* PENYUSUNAN ULANG DIKSI: Menggunakan "Arsip Karya" */}
+              <div className="bg-[#8287ac]/5 border-l-2 border-[#8287ac] p-3 not-italic">
+                <p className="text-[11px] text-[#8287ac] font-medium leading-tight tracking-tight">
+                  Catatan: Jika dipaksakan lanjut, arsip karya tidak akan muncul di dalam halaman.
+                </p>
+              </div>
+
+              <p className="text-[10px] opacity-40 not-italic border-t border-[#8287ac]/10 pt-4">
+                *Data akan kembali normal saat periode reset layanan dimulai kembali.
               </p>
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               <button
                 onClick={onRetry}
-                className="w-full py-2.5 px-4 rounded-xl bg-[#8da399] text-white font-bold hover:bg-[#7a9186] transition-all transform hover:-translate-y-0.5 shadow-md">
-                Coba Muat Ulang 🔄
+                className="w-full py-4 border border-[#8287ac]/30 text-[#E0D7D7] font-bold text-xs tracking-[0.2em] hover:bg-[#8287ac] hover:text-[#121214] transition-all flex items-center justify-center gap-2 uppercase">
+                <RefreshCw size={14} /> Muat Ulang
               </button>
 
               <button
                 onClick={onContinue}
-                className="w-full py-2.5 px-4 rounded-xl border-2 border-[#8da399] text-[#8da399] font-bold hover:bg-[#8da399]/10 transition-colors">
-                Tetap Lanjut ke Website ➔
+                className="w-full py-4 text-[#B8B3B6] text-[10px] font-mono tracking-widest hover:text-[#E0D7D7] transition-colors flex items-center justify-center gap-2 uppercase opacity-60">
+                Lanjut Tanpa Data <ArrowRight size={12} />
               </button>
-              <p className="text-[10px] text-gray-400 text-center mt-1">
-                (Koleksi stiker mungkin tidak akan tampil di dalam)
-              </p>
             </div>
           </div>
         )}
