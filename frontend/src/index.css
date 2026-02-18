@@ -1,37 +1,32 @@
 @import "tailwindcss";
-
-/* PALETTE: Warm Paper & Sage (Cocok untuk Sticker Shop) */
+/* gilangages/lumasticker/lumasticker-main/frontend/src/index.css */
 :root {
-  --bg-paper: #fdfcf8; /* Krem Kertas */
-  --text-ink: #3e362e; /* Coklat Tua (Tinta) */
-  --primary-sage: #8da399; /* Hijau Sage Kalem */
-  --accent-clay: #d68c76; /* Merah Bata Pudar */
+  /* PALETTE: Deep Melancholy (Berdasarkan Gambar Kaneki & Sketsamu) */
+  --bg-void: #121214; /* Hitam pekat yang tenang */
+  --text-dim: #b8b3b6; /* Abu-abu pudar (warna dari gambar Kaneki) */
+  --primary-mist: #8287ac; /* Ungu kebiruan pudar (warna dominan gambarmu) */
+  --accent-ink: #2a2424; /* Hitam kecokelatan untuk card/border */
 }
 
 body {
-  font-family: "Nunito", sans-serif;
-  background-color: var(--bg-paper);
-  color: var(--text-ink);
-  /* Pattern titik-titik halus (Dot Grid) ala buku jurnal */
-  background-image: radial-gradient(#e5e0d8 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-color: var(--bg-void);
+  color: var(--text-dim);
+  /* Pakai grid yang sangat tipis agar terasa seperti buku sketsa di kegelapan */
+  background-image: radial-gradient(#1f1f23 1px, transparent 1px);
+  background-size: 30px 30px;
 }
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
+/* Custom Scrollbar yang lebih gelap */
 ::-webkit-scrollbar-track {
-  background: #f1f0eb;
+  background: #121010;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cdc8c0;
+  background: var(--accent-ink);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8da399;
+  background: var(--primary-maroon);
 }
 
 /* Animasi Modal */
@@ -49,16 +44,16 @@ body {
   animation: slideUp 0.4s ease-out forwards;
 }
 
-/* ANIMASI BARU: Floating Elements ala Goodnotes */
+/* Update animasi agar terasa lebih 'lambat' dan lo-fi */
 @keyframes float {
-  0% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-15px) rotate(2deg);
-  }
+  0%,
   100% {
     transform: translateY(0px) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+    opacity: 0.9;
   }
 }
 

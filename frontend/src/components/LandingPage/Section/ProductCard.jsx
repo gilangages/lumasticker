@@ -1,20 +1,18 @@
-import { ShoppingBag, ImageOff } from "lucide-react"; // Tambah icon ImageOff untuk error state
+// gilangages/lumasticker/lumasticker-main/frontend/src/components/LandingPage/Section/ProductCard.jsx
+
+import { ShoppingBag, ImageOff } from "lucide-react";
 import { useState } from "react";
 
 export const ProductCard = ({ product, onBuy }) => {
   const [imgError, setImgError] = useState(false);
 
-  // Helper: Mendapatkan URL gambar utama dengan aman
+  // Logic tetap: Mendapatkan URL gambar utama
   const getMainImage = () => {
-    // 1. Cek array images
     if (Array.isArray(product.images) && product.images.length > 0) {
       const firstImg = product.images[0];
       return typeof firstImg === "object" ? firstImg.url : firstImg;
     }
-    // 2. Cek field legacy image_url
     if (product.image_url) return product.image_url;
-
-    // 3. Fallback null
     return null;
   };
 
@@ -23,42 +21,41 @@ export const ProductCard = ({ product, onBuy }) => {
   return (
     <div
       onClick={() => onBuy(product)}
-      className="group bg-white p-3 rounded-xl border-2 border-[#E5E0D8] hover:border-[#8DA399] shadow-sm hover:shadow-[6px_6px_0px_0px_rgba(141,163,153,0.5)] transition-all duration-300 cursor-pointer flex flex-col h-full">
-      {/* Container Gambar */}
-      <div className="aspect-square bg-[#F3F0E9] rounded-lg overflow-hidden mb-3 relative border border-[#E5E0D8] flex items-center justify-center">
-        {/* Logic Render Gambar yang Lebih Aman */}
+      className="group bg-[#1F1F23]/40 p-4 rounded-none border border-[#8287ac]/10 hover:border-[#8287ac]/40 transition-all duration-500 cursor-pointer flex flex-col h-full shadow-2xl">
+      {/* Container Gambar: Dibuat lebih gelap dan kaku */}
+      <div className="aspect-square bg-[#121214] rounded-none overflow-hidden mb-4 relative border border-[#8287ac]/5 flex items-center justify-center">
         {!imgError && imageUrl ? (
           <img
             onContextMenu={(e) => e.preventDefault()}
             onDragStart={(e) => e.preventDefault()}
             src={imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            onError={() => setImgError(true)} // Set state error, jangan ubah src langsung agar React tau
+            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 grayscale-[20%] group-hover:grayscale-0"
+            onError={() => setImgError(true)}
           />
         ) : (
-          // Tampilan Fallback Jika Gambar Error / Kosong
-          <div className="flex flex-col items-center justify-center text-[#8DA399] p-4 text-center">
-            <ImageOff size={32} className="mb-2 opacity-50" />
-            <span className="text-xs font-medium">Gambar Tidak Tersedia</span>
+          <div className="flex flex-col items-center justify-center text-[#8287ac]/40 p-4 text-center">
+            <ImageOff size={32} className="mb-2" />
+            <span className="text-[10px] font-mono tracking-widest uppercase">Null_Image</span>
           </div>
         )}
 
-        {/* Label Harga */}
-        <div className="absolute bottom-2 right-2 bg-[#FDFCF8] border border-[#3E362E] text-[#3E362E] text-xs font-bold px-2 py-1 rounded shadow-[2px_2px_0px_0px_rgba(62,54,46,1)] z-10">
+        {/* Label Harga: Style tag minimalis */}
+        <div className="absolute top-3 right-3 bg-[#121214]/80 backdrop-blur-sm border border-[#8287ac]/30 text-[#E0D7D7] text-[10px] font-mono px-2 py-1 z-10">
           Rp {parseInt(product.price).toLocaleString("id-ID")}
         </div>
       </div>
 
-      <div className="px-1 flex flex-col flex-grow">
-        <h3 className="font-bold text-lg text-[#3E362E] leading-tight mb-1 group-hover:text-[#8DA399] transition-colors line-clamp-1">
+      <div className="flex flex-col flex-grow">
+        <h3 className="font-bold text-lg text-[#E0D7D7] leading-tight mb-2 group-hover:text-[#8287ac] transition-colors line-clamp-1 tracking-tight">
           {product.name}
         </h3>
-        <p className="text-xs text-[#8C8478] line-clamp-2 mb-4">{product.description}</p>
+        <p className="text-xs text-[#B8B3B6] line-clamp-2 mb-6 font-light italic opacity-70">{product.description}</p>
 
-        <button className="mt-auto w-full bg-[#3E362E] text-[#FDFCF8] text-sm font-bold py-2 rounded-lg group-hover:bg-[#8DA399] transition-colors flex items-center justify-center gap-2">
+        {/* Button: Tanpa rounded, border-only style */}
+        <button className="mt-auto w-full border border-[#8287ac]/20 text-[#E0D7D7] text-xs font-bold py-3 rounded-none group-hover:bg-[#8287ac] group-hover:text-[#121214] transition-all duration-300 flex items-center justify-center gap-2 uppercase tracking-widest">
           <ShoppingBag size={14} />
-          Lihat Detail
+          Detail Karya
         </button>
       </div>
     </div>

@@ -8,40 +8,33 @@ import {
   Check,
   MessageCircle,
   AlertCircle,
-} from "lucide-react"; // [MODIFIKASI] Tambah AlertCircle
+} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router";
 import ReactMarkdown from "react-markdown";
 
 export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
-  // --- STATE BARU: Email ---
+  // --- STATE (Logic Tetap) ---
   const [email, setEmail] = useState("");
-
-  // [MODIFIKASI] State untuk error handling
   const [errors, setErrors] = useState({ email: false, agreement: false });
-
   const [currentImgIdx, setCurrentImgIdx] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
 
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
-
-  // [MODIFIKASI] Ref untuk auto-scroll target
   const emailInputRef = useRef(null);
   const agreementRef = useRef(null);
 
-  // --- NORMALISASI DATA IMAGES (TIDAK DIUBAH) ---
+  // --- NORMALISASI DATA IMAGES (Logic Tetap) ---
   const getNormalizedImages = () => {
     if (!product) return [];
-
     let rawImages = [];
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
       rawImages = product.images;
     } else if (product.image_url) {
       rawImages = [product.image_url];
     }
-
     return rawImages.map((img) => {
       if (typeof img === "object" && img !== null) {
         return { url: img.url, label: img.label || "" };
@@ -67,11 +60,11 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
     }
   };
 
+  // --- BROWSER HISTORY LOGIC (Logic Tetap) ---
   useEffect(() => {
     if (isOpen) {
       window.history.pushState({ modalOpen: true }, "", window.location.href);
       const handlePopState = (event) => {
-        console.log(event);
         onClose();
       };
       window.addEventListener("popstate", handlePopState);
@@ -82,8 +75,9 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
         }
       };
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
+  // --- KEYBOARD NAV (Logic Tetap) ---
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!isZoomOpen) return;
@@ -97,14 +91,13 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
 
   if (!isOpen || !product) return null;
 
+  // --- TOUCH HANDLERS (Logic Tetap) ---
   const handleTouchStart = (e) => {
     touchStartX.current = e.targetTouches[0].clientX;
   };
-
   const handleTouchMove = (e) => {
     touchEndX.current = e.targetTouches[0].clientX;
   };
-
   const handleTouchEnd = () => {
     if (!touchStartX.current || !touchEndX.current) return;
     const distance = touchStartX.current - touchEndX.current;
@@ -114,31 +107,22 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
     touchEndX.current = null;
   };
 
-  // [MODIFIKASI] Logic Submit Baru: Validasi saat klik + Auto Scroll
+  // --- SUBMIT LOGIC (Logic Tetap) ---
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Reset error state
     setErrors({ email: false, agreement: false });
-
     let hasError = false;
     let newErrors = { email: false, agreement: false };
 
-    // Cek Email
     if (!email) {
       newErrors.email = true;
       hasError = true;
-      // Scroll ke input email
       if (emailInputRef.current) {
         emailInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-        // Fokus ke input agar user bisa langsung ngetik (opsional tapi bagus untuk UX)
-        // Kita cari elemen <input> di dalam div ref
         const inputElement = emailInputRef.current.querySelector("input");
         if (inputElement) inputElement.focus();
       }
-    }
-    // Cek Agreement (hanya scroll jika email sudah aman agar tidak rebutan scroll)
-    else if (!isAgreed) {
+    } else if (!isAgreed) {
       newErrors.agreement = true;
       hasError = true;
       if (agreementRef.current) {
@@ -147,93 +131,84 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
     }
 
     setErrors(newErrors);
-
     if (hasError) return;
-
     onSubmit({ ...product, buyerEmail: email });
   };
 
   const markdownComponents = {
-    // eslint-disable-next-line no-unused-vars
-    strong: ({ node, ...props }) => <span className="font-black text-[#3E362E]" {...props} />,
-    // eslint-disable-next-line no-unused-vars
-    ul: ({ node, ...props }) => <ul className="list-disc pl-4 space-y-1 my-2" {...props} />,
-    // eslint-disable-next-line no-unused-vars
+    strong: ({ node, ...props }) => <span className="font-bold text-[#E0D7D7]" {...props} />,
+    ul: ({ node, ...props }) => <ul className="list-disc pl-4 space-y-1 my-3 text-[13px]" {...props} />,
     li: ({ node, ...props }) => <li className="pl-1" {...props} />,
-    // eslint-disable-next-line no-unused-vars
-    p: ({ node, ...props }) => <p className="mb-3 italic" {...props} />,
+    p: ({ node, ...props }) => <p className="mb-3 font-light leading-relaxed" {...props} />,
   };
 
   return (
     <>
-      <div className="fixed inset-0 z-51 flex items-end md:items-center justify-center bg-[#3E362E]/60 backdrop-blur-sm p-0 md:p-4 animate-fadeIn">
-        {/* Container Modal Utama */}
-        {/* FIX 1 (Mobile): Gunakan h-[85vh] agar tidak kepanjangan dan kena address bar browser.
-            FIX 2 (Desktop): Gunakan h-[640px] (FIXED height) bukan h-auto. Ini KUNCI agar scrollbar muncul.
-            Hapus md:max-h-[640px] karena kita sudah set tinggi pastinya.
-        */}
-        <div className="bg-[#FDFCF8] w-full md:max-w-4xl rounded-t-[32px] md:rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[85vh] md:h-[640px] relative border-t-4 md:border-4 border-[#3E362E]">
-          {/* Close Button */}
+      {/* Backdrop: Dark Void Style */}
+      <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-[#121214]/90 backdrop-blur-md p-0 md:p-4 animate-fadeIn">
+        {/* Container Modal Utama: Sharp Corners & Dark Theme */}
+        <div className="bg-[#121214] w-full md:max-w-4xl rounded-none md:rounded-none shadow-2xl overflow-hidden flex flex-col md:flex-row h-[85vh] md:h-[640px] relative border border-[#8287ac]/20">
+          {/* Close Button: Minimalist Sharp */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 z-30 bg-white/90 backdrop-blur-md border-2 border-[#3E362E] p-2 rounded-full hover:bg-red-50 transition-all shadow-[2px_2px_0px_0px_rgba(62,54,46,1)] active:translate-y-[2px] active:shadow-none">
-            <X size={18} color="#3E362E" strokeWidth={3} />
+            className="absolute top-4 right-4 z-40 bg-[#121214] border border-[#8287ac]/30 p-2 text-[#8287ac] hover:bg-[#8287ac] hover:text-[#121214] transition-all">
+            <X size={20} strokeWidth={2} />
           </button>
 
           {/* KOLOM KIRI (FOTO) */}
           <div
-            className="w-full md:w-1/2 h-[35vh] md:h-full shrink-0 bg-[#EAE7DF] relative overflow-hidden"
+            className="w-full md:w-1/2 h-[35vh] md:h-full shrink-0 bg-[#1F1F23] relative overflow-hidden border-b md:border-b-0 md:border-r border-[#8287ac]/10"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}>
             <div
-              className="relative w-full h-full overflow-hidden bg-white group cursor-zoom-in"
+              className="relative w-full h-full overflow-hidden group cursor-zoom-in"
               onClick={() => setIsZoomOpen(true)}>
               <img
                 onContextMenu={(e) => e.preventDefault()}
                 onDragStart={(e) => e.preventDefault()}
                 src={currentImage?.url}
                 alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-110"
-                onError={(e) => (e.target.src = "https://placehold.co/600x600?text=No+Image")}
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 grayscale-[20%] group-hover:grayscale-0"
+                onError={(e) => (e.target.src = "https://placehold.co/600x600?text=Fragment+Not+Found")}
               />
 
               {currentImage?.label && (
                 <div className="absolute top-4 left-4 z-20">
-                  <div className="px-3 py-1.5 bg-white/90 backdrop-blur border border-[#3E362E]/10 rounded-full shadow-sm">
-                    <p className="text-[10px] font-bold text-[#3E362E] uppercase tracking-wider">
+                  <div className="px-2 py-1 bg-[#121214]/80 backdrop-blur border border-[#8287ac]/20">
+                    <p className="text-[9px] font-mono font-bold text-[#E0D7D7] uppercase tracking-widest">
                       {currentImage.label}
                     </p>
                   </div>
                 </div>
               )}
 
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent md:hidden" />
-
+              {/* Navigation Buttons: Preserved logic & visibility */}
               {images.length > 1 && (
                 <div className="hidden md:block">
                   <button
                     onClick={prevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full border-2 border-[#3E362E] hover:bg-white transition-all z-10 shadow-md">
-                    <ChevronLeft size={24} color="#3E362E" />
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#E0D7D7] bg-[#121214]/50 p-2 hover:bg-[#8287ac]/20 transition-all z-10 border border-[#8287ac]/20">
+                    <ChevronLeft size={20} />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full border-2 border-[#3E362E] hover:bg-white transition-all z-10 shadow-md">
-                    <ChevronRight size={24} color="#3E362E" />
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#E0D7D7] bg-[#121214]/50 p-2 hover:bg-[#8287ac]/20 transition-all z-10 border border-[#8287ac]/20">
+                    <ChevronRight size={20} />
                   </button>
                 </div>
               )}
             </div>
 
+            {/* Dots Nav */}
             {images.length > 1 && (
               <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20">
-                <div className="flex gap-2 px-3 py-1.5 bg-black/20 backdrop-blur-md rounded-full">
+                <div className="flex gap-1.5 px-3 py-1.5 bg-[#121214]/40 backdrop-blur-md">
                   {images.map((_, idx) => (
                     <div
                       key={idx}
-                      className={`h-1 rounded-full transition-all duration-300 ${
-                        currentImgIdx === idx ? "w-6 bg-white" : "w-1.5 bg-white/40"
+                      className={`h-0.5 transition-all duration-300 ${
+                        currentImgIdx === idx ? "w-4 bg-[#8287ac]" : "w-2 bg-[#8287ac]/20"
                       }`}
                     />
                   ))}
@@ -243,138 +218,118 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
           </div>
 
           {/* KOLOM KANAN (FORM & KONTEN) */}
-          {/* FIX 3: Tambahkan 'min-h-0' dan pastikan structure flex benar */}
-          <div className="w-full md:w-1/2 flex flex-col flex-1 md:h-full min-h-0 bg-[#FDFCF8] overflow-hidden">
-            {/* FIX 4: Form juga perlu min-h-0 agar flex-grow di dalamnya bekerja jika kontennya panjang */}
+          <div className="w-full md:w-1/2 flex flex-col flex-1 md:h-full min-h-0 bg-[#121214] overflow-hidden">
             <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
               {/* AREA 1: SCROLLABLE CONTENT */}
-              <div className="flex-grow overflow-y-auto p-6 md:p-10">
-                <div className="mb-6">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#3E362E]/5 rounded-lg mb-4 border border-[#3E362E]/10">
-                    <ImageIcon size={12} className="text-[#3E362E]" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#3E362E]">
-                      Karya Digital
-                    </span>
+              <div className="flex-grow overflow-y-auto p-6 md:p-10 custom-scrollbar">
+                <div className="mb-10">
+                  <div className="inline-flex items-center gap-2 px-2 py-0.5 border border-[#8287ac]/20 mb-6 bg-[#1F1F23]">
+                    <ImageIcon size={12} className="text-[#8287ac]" />
+                    <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-[#8287ac]">Arsip_Karya</span>
                   </div>
 
-                  <h2 className="text-3xl font-black text-[#3E362E] mb-4 leading-[1.1] uppercase italic tracking-tight">
+                  <h2 className="text-3xl font-black text-[#E0D7D7] mb-6 leading-tight uppercase tracking-tighter">
                     {product.name}
                   </h2>
 
-                  <div className="relative">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#3E362E]/10 rounded-full" />
-                    <div className="pl-5 text-sm md:text-base text-[#6B5E51] leading-relaxed italic font-medium">
+                  <div className="relative border-l border-[#8287ac]/20 pl-6">
+                    <div className="text-[13px] md:text-sm text-[#B8B3B6] leading-relaxed italic opacity-80">
                       <ReactMarkdown components={markdownComponents}>
-                        {product.description || "Koleksi aset digital eksklusif untuk kebutuhan kreatifmu."}
+                        {product.description || "Goresan tanpa rencana. Hanya fragmen visual untuk ruang sunyimu."}
                       </ReactMarkdown>
                     </div>
                   </div>
                 </div>
 
                 {/* FORM INPUTS */}
-                <div className="space-y-4">
-                  {/* [MODIFIKASI] Wrapper Input Email dengan Ref & Error Style */}
+                <div className="space-y-6">
                   <div
                     ref={emailInputRef}
-                    className={`bg-white p-1 rounded-xl border-2 transition-colors relative group ${
+                    className={`bg-[#1F1F23]/50 p-1 border transition-all relative group ${
                       errors.email
-                        ? "border-red-500 shadow-[0_0_0_2px_rgba(239,68,68,0.1)]"
-                        : "border-[#E5E0D8] focus-within:border-[#3E362E]"
+                        ? "border-red-500/50 bg-red-500/5"
+                        : "border-[#8287ac]/10 focus-within:border-[#8287ac]/40"
                     }`}>
                     <div
-                      className={`absolute left-3 top-1/2 -translate-y-1/2 ${errors.email ? "text-red-500" : "text-[#3E362E]/40 group-focus-within:text-[#3E362E]"}`}>
-                      <Mail size={18} />
+                      className={`absolute left-3 top-1/2 -translate-y-1/2 ${errors.email ? "text-red-500" : "text-[#8287ac]/30"}`}>
+                      <Mail size={16} />
                     </div>
                     <input
                       type="email"
-                      // required -> dihapus agar kita bisa handle validasi sendiri
-                      placeholder="Masukkan Email Gmail (Wajib)"
-                      className="w-full pl-10 pr-4 py-3 bg-transparent text-[#3E362E] font-medium outline-none placeholder:text-[#3E362E]/30 text-sm md:text-base"
+                      placeholder="Email Gmail"
+                      className="w-full pl-10 pr-10 py-3 bg-transparent text-[#E0D7D7] font-light outline-none placeholder:text-[#B8B3B6]/30 text-xs md:text-sm"
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
-                        if (errors.email) setErrors((prev) => ({ ...prev, email: false })); // Hapus error saat ngetik
+                        if (errors.email) setErrors((prev) => ({ ...prev, email: false }));
                       }}
                     />
-                    {/* Icon Alert Error */}
                     {errors.email && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 animate-pulse">
-                        <AlertCircle size={18} />
+                        <AlertCircle size={16} />
                       </div>
                     )}
                   </div>
 
-                  {/* Pesan Error atau Helper Text */}
                   {errors.email ? (
-                    <p className="text-[10px] text-red-500 font-bold px-1 -mt-2 mb-2 animate-bounce">
-                      *Ups! Email wajib diisi dulu ya.
+                    <p className="text-[10px] text-red-500 font-mono tracking-tighter -mt-4 uppercase">
+                      // email_harus_diisi
                     </p>
                   ) : (
-                    <p className="text-[10px] text-[#6B5E51]/80 px-1 -mt-2 mb-2 italic">
-                      *Email digunakan untuk memberi akses file di Google Drive.
+                    <p className="text-[10px] text-[#B8B3B6]/40 -mt-4 italic font-mono">
+                      *Akses Google Drive akan dikirim ke email ini.
                     </p>
                   )}
 
-                  <div className="bg-[#F3F0E9] p-4 rounded-xl border border-[#E5E0D8] space-y-2">
+                  <div className="bg-[#1F1F23] p-5 border border-[#8287ac]/10 space-y-3">
                     <div className="flex items-center gap-2">
-                      <div className="bg-[#3E362E] text-white p-1 rounded-full">
-                        <MessageCircle size={12} />
-                      </div>
-                      <p className="text-[10px] font-black uppercase tracking-wider text-[#3E362E]">Info Pengiriman</p>
+                      <Lock size={12} className="text-[#8287ac]/50" />
+                      <p className="text-[9px] font-mono uppercase tracking-widest text-[#8287ac]/70">Proses_Arsip</p>
                     </div>
-
-                    <ul className="space-y-1 text-xs text-[#6B5E51] font-medium leading-relaxed list-disc pl-4">
+                    <ul className="space-y-1.5 text-[11px] text-[#B8B3B6] font-light leading-relaxed list-disc pl-4 opacity-80">
                       <li>
-                        Lanjutkan ke <strong>WhatsApp</strong> untuk pembayaran.
+                        Konfirmasi via <strong>WhatsApp</strong>.
                       </li>
-                      <li>
-                        Link Google Drive akan dikirim/diaktifkan ke email di atas setelah bukti transfer diterima.
-                      </li>
+                      <li>File diaktifkan manual setelah verifikasi.</li>
                     </ul>
                   </div>
 
                   <div className="pt-2" ref={agreementRef}>
-                    {" "}
-                    {/* [MODIFIKASI] Ref untuk Agreement */}
                     <div
                       className="flex items-start gap-3 group cursor-pointer select-none"
                       onClick={() => {
                         setIsAgreed(!isAgreed);
-                        if (errors.agreement) setErrors((prev) => ({ ...prev, agreement: false })); // Hapus error saat klik
+                        if (errors.agreement) setErrors((prev) => ({ ...prev, agreement: false }));
                       }}>
-                      {/* [MODIFIKASI] Visual error pada checkbox box */}
                       <div
-                        className={`w-5 h-5 mt-0.5 shrink-0 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                        className={`w-4 h-4 mt-0.5 shrink-0 border flex items-center justify-center transition-all ${
                           isAgreed
-                            ? "bg-[#3E362E] border-[#3E362E]"
+                            ? "bg-[#8287ac] border-[#8287ac]"
                             : errors.agreement
-                              ? "bg-red-50 border-red-500 animate-pulse" // Style error
-                              : "bg-white border-[#E5E0D8] group-hover:border-[#8DA399]"
+                              ? "bg-red-500/10 border-red-500 animate-pulse"
+                              : "bg-[#1F1F23] border-[#8287ac]/20 group-hover:border-[#8287ac]/50"
                         }`}>
-                        {isAgreed && <Check size={14} className="text-[#FDFCF8]" strokeWidth={4} />}
+                        {isAgreed && <Check size={12} className="text-[#121214]" strokeWidth={4} />}
                       </div>
 
                       <div className="flex flex-col">
                         <p
-                          className={`text-xs font-medium leading-snug ${errors.agreement ? "text-red-500" : "text-[#6B5E51]"}`}>
-                          Saya menyetujui{" "}
-                          <Link
-                            to="/terms"
-                            className="underline decoration-dotted hover:text-[#3E362E] transition-colors">
+                          className={`text-[11px] font-light leading-snug ${errors.agreement ? "text-red-500" : "text-[#B8B3B6]"}`}>
+                          Menyetujui{" "}
+                          <Link to="/terms" className="text-[#E0D7D7] underline hover:text-[#8287ac] transition-colors">
                             Syarat & Ketentuan
                           </Link>{" "}
                           serta{" "}
                           <Link
                             to="/privacy"
-                            className="underline decoration-dotted hover:text-[#3E362E] transition-colors">
+                            className="text-[#E0D7D7] underline hover:text-[#8287ac] transition-colors">
                             Kebijakan Privasi
                           </Link>
                           .
                         </p>
-                        {/* Pesan Error Kecil */}
                         {errors.agreement && (
-                          <span className="text-[10px] text-red-500 font-bold mt-1">
-                            *Mohon dicentang untuk melanjutkan.
+                          <span className="text-[9px] text-red-500 font-mono uppercase mt-1 tracking-tighter">
+                            // persetujuan_dibutuhkan
                           </span>
                         )}
                       </div>
@@ -384,29 +339,25 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
               </div>
 
               {/* AREA 2: FIXED FOOTER */}
-              <div className="p-4 md:p-10 border-t-2 border-dashed border-[#E5E0D8] bg-[#FDFCF8] z-10 shrink-0 shadow-[0_-4px_10px_-2px_rgba(0,0,0,0.05)]">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between px-1">
-                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[#6B5E51]">
-                      Total Bayar
+              <div className="p-6 md:px-10 md:pb-10 border-t border-[#8287ac]/10 bg-[#121214] z-10 shrink-0">
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-[#B8B3B6]/50">
+                      Total_Bayar
                     </span>
-                    <span className="text-3xl font-black text-[#3E362E] tracking-tighter">
+                    <span className="text-3xl font-black text-[#E0D7D7] tracking-tighter">
                       Rp {parseInt(product.price).toLocaleString("id-ID")}
                     </span>
                   </div>
 
                   <button
                     type="submit"
-                    // [MODIFIKASI] Disabled dihapus agar tombol selalu bisa diklik untuk trigger validasi
-                    // Style diganti menjadi selalu "Active Green"
-                    className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-black py-4 rounded-xl shadow-[4px_4px_0px_0px_rgba(32,189,90,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all flex justify-center items-center gap-3 uppercase tracking-widest text-sm group border-2 border-[#25D366]">
+                    className="w-full border border-[#25D366]/40 text-[#E0D7D7] font-bold py-4 hover:bg-[#25D366]/10 transition-all flex justify-center items-center gap-3 uppercase tracking-[0.2em] text-[11px] group">
                     <MessageCircle
-                      size={20}
-                      // Rotasi icon hanya saat form valid (opsional, tapi manis)
-                      className={isAgreed && email ? "group-hover:-rotate-12 transition-transform" : ""}
-                      fill="white"
+                      size={18}
+                      className={`text-[#25D366] ${isAgreed && email ? "group-hover:-rotate-12 transition-transform" : "opacity-40"}`}
                     />
-                    Bungkus via WhatsApp
+                    Konfirmasi via WhatsApp
                   </button>
                 </div>
               </div>
@@ -415,44 +366,45 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
         </div>
       </div>
 
-      {/* --- LIGHTBOX ZOOM (TIDAK BERUBAH) --- */}
+      {/* --- LIGHTBOX ZOOM (Logic Nav Tetap Dipertahankan) --- */}
       {isZoomOpen && (
         <div
-          className="fixed inset-0 z-[100] bg-[#3E362E]/95 flex items-center justify-center animate-fadeIn"
+          className="fixed inset-0 z-[100] bg-[#121214]/98 flex items-center justify-center animate-fadeIn cursor-zoom-out"
           onClick={() => setIsZoomOpen(false)}>
-          <button className="absolute top-6 right-6 text-white bg-white/10 p-3 rounded-full border border-white/20 hover:bg-white/20 transition-all z-[110]">
-            <X size={32} />
+          <button className="absolute top-6 right-6 text-[#E0D7D7] p-2 hover:text-[#8287ac] transition-all z-[110]">
+            <X size={32} strokeWidth={1} />
           </button>
 
           {currentImage?.label && (
             <div className="absolute top-6 left-6 z-[110]">
-              <div className="bg-black/60 backdrop-blur px-5 py-2.5 rounded-full border border-white/20">
-                <p className="text-white text-sm font-bold tracking-wider uppercase">{currentImage.label}</p>
+              <div className="bg-[#1F1F23] px-4 py-2 border border-[#8287ac]/20">
+                <p className="text-[#E0D7D7] text-[10px] font-mono tracking-widest uppercase">{currentImage.label}</p>
               </div>
             </div>
           )}
 
+          {/* Nav Buttons in Zoom View: Logic & Visibility Preserved */}
           {images.length > 1 && (
             <>
               <button
                 onClick={prevImage}
-                className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 text-white bg-white/5 p-4 rounded-full border border-white/10 hover:bg-white/20 transition-all z-[110] group">
-                <ChevronLeft size={48} className="group-hover:scale-110 transition-transform" />
+                className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 text-[#E0D7D7] bg-white/5 p-4 border border-[#8287ac]/10 hover:bg-[#8287ac]/20 transition-all z-[110] group">
+                <ChevronLeft size={32} className="group-hover:scale-110 transition-transform" />
               </button>
               <button
                 onClick={nextImage}
-                className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 text-white bg-white/5 p-4 rounded-full border border-white/10 hover:bg-white/20 transition-all z-[110] group">
-                <ChevronRight size={48} className="group-hover:scale-110 transition-transform" />
+                className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 text-[#E0D7D7] bg-white/5 p-4 border border-[#8287ac]/10 hover:bg-[#8287ac]/20 transition-all z-[110] group">
+                <ChevronRight size={32} className="group-hover:scale-110 transition-transform" />
               </button>
             </>
           )}
 
-          <div className="relative w-full h-full flex items-center justify-center p-0 md:p-20">
+          <div className="relative w-full h-full flex items-center justify-center p-4">
             <img
               onContextMenu={(e) => e.preventDefault()}
               onDragStart={(e) => e.preventDefault()}
               src={currentImage?.url}
-              className="max-w-full max-h-full object-contain animate-popIn shadow-2xl"
+              className="max-w-full max-h-full object-contain animate-popIn"
               onClick={(e) => e.stopPropagation()}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -461,8 +413,8 @@ export const CheckoutModal = ({ isOpen, onClose, product, onSubmit }) => {
           </div>
 
           <div className="absolute bottom-10">
-            <div className="text-white font-black tracking-widest text-xs bg-black/40 px-6 py-2.5 rounded-full backdrop-blur-md border border-white/10 uppercase">
-              {currentImgIdx + 1} / {images.length}
+            <div className="text-[#B8B3B6] font-mono text-[10px] tracking-widest bg-[#1F1F23] px-4 py-1.5 border border-[#8287ac]/10 uppercase">
+              Fragmen {currentImgIdx + 1} / {images.length}
             </div>
           </div>
         </div>
